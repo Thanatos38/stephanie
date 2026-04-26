@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { client } from "../sanity";
 import emailjs from "emailjs-com";
 import { useRef } from "react";
+import { FaInstagram } from "react-icons/fa";
 
 export default function Home({ darkMode, setDarkMode }) {
   const [projects, setProjects] = useState([]);
@@ -58,12 +59,15 @@ export default function Home({ darkMode, setDarkMode }) {
       });
   }, []);
 
-  const changeLanguage = (lang) => {
-  const select = document.querySelector(".goog-te-combo");
-  if (select) {
-    select.value = lang;
-    select.dispatchEvent(new Event("change"));
-  }
+const changeLanguage = (lang) => {
+  if (lang === "en") return;
+
+  const url = window.location.origin;
+
+  window.open(
+    `https://translate.google.com/translate?sl=en&tl=de&u=${encodeURIComponent(url)}`,
+    "_blank"
+  );
 };
 
   // 🔥 SCROLL ANIMATION FOR CITIES
@@ -247,6 +251,16 @@ export default function Home({ darkMode, setDarkMode }) {
             <button type="submit">Send Message</button>
 
           </form>
+
+
+          <a
+  href="https://www.instagram.com/stephanie.traut.design?igsh=NTQ5Ymo2MzVqbTBv"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="insta-icon"
+>
+  <FaInstagram size={24} />
+</a>
 
         </div>
       </section>

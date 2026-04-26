@@ -2,6 +2,7 @@ import "../App.css";
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { client } from "../sanity";
+import { FaInstagram } from "react-icons/fa";
 
 export default function ProjectDetail({ darkMode, setDarkMode }) {
   const { id } = useParams();
@@ -9,16 +10,19 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [project, setProject] = useState(null);
+
+  // ✅ FIXED LANGUAGE FUNCTION (ONLY CHANGE)
   const changeLanguage = (lang) => {
-  const interval = setInterval(() => {
-    const select = document.querySelector(".goog-te-combo");
-    if (select) {
-      select.value = lang;
-      select.dispatchEvent(new Event("change"));
-      clearInterval(interval);
-    }
-  }, 500);
-};
+    if (lang === "en") return;
+
+    const url = window.location.origin;
+
+    window.open(
+      "https://translate.google.com/translate?sl=en&tl=de&u=" +
+        encodeURIComponent(url),
+      "_blank"
+    );
+  };
 
   useEffect(() => {
     client.fetch(
@@ -71,10 +75,11 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
               <div className="toggle-thumb"></div>
             </div>
           </button>
+
           <div className="lang-switch">
-  <button onClick={() => changeLanguage("en")}>EN</button>
-  <button onClick={() => changeLanguage("de")}>DE</button>
-</div>
+            <button onClick={() => changeLanguage("en")}>EN</button>
+            <button onClick={() => changeLanguage("de")}>DE</button>
+          </div>
 
           {/* HAMBURGER */}
           <div
@@ -125,19 +130,19 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
             <p>{project.date}</p>
           </div>
 
-         <div>
-  <h4>Team</h4>
+          <div>
+            <h4>Team</h4>
 
-  {project.team?.map((member, index) => (
-  <div key={index} className="team-member">
-    <p>
-      <span className="member-name">{member.name}</span> —{" "}
-      <span className="member-role">{member.role}</span>
-    </p>
-  </div>
-))}
+            {project.team?.map((member, index) => (
+              <div key={index} className="team-member">
+                <p>
+                  <span className="member-name">{member.name}</span> —{" "}
+                  <span className="member-role">{member.role}</span>
+                </p>
+              </div>
+            ))}
 
-</div>
+          </div>
 
         </div>
 
@@ -146,7 +151,6 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
       {/* DESCRIPTION */}
       <section className="project-longdesc">
         <div className="desc-container">
-          
           <p className="desc-text">{project.longDesc}</p>
         </div>
       </section>
@@ -179,6 +183,15 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
             <button type="submit">Send Message</button>
 
           </form>
+
+            <a
+            href="https://www.instagram.com/stephanie.traut.design?igsh=NTQ5Ymo2MzVqbTBv"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="insta-icon"
+          >
+            <FaInstagram size={24} />
+          </a>
 
         </div>
       </section>

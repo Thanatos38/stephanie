@@ -18,24 +18,7 @@ export default function App() {
     if (saved === "dark") setDarkMode(true);
   }, []);
   
-  useEffect(() => {
-  const addScript = document.createElement("script");
-  addScript.src =
-    "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
-  addScript.async = true;
-  document.body.appendChild(addScript);
-
-  window.googleTranslateElementInit = () => {
-    new window.google.translate.TranslateElement(
-      {
-        pageLanguage: "en",
-        includedLanguages: "en,de",
-        autoDisplay: false,
-      },
-      "google_translate_element"
-    );
-  };
-}, []);
+  
 
   useEffect(() => {
     localStorage.setItem("theme", darkMode ? "dark" : "light");
@@ -48,7 +31,7 @@ useEffect(() => {
 
   return (
   <div className={darkMode ? "dark" : "light"}>
-  <div id="google_translate_element" style={{ display: "none" }}></div>
+  
     <Routes>
       <Route path="/" element={<Home darkMode={darkMode} setDarkMode={setDarkMode} />} />
       <Route path="/set" element={<SetPage darkMode={darkMode} setDarkMode={setDarkMode} />} />

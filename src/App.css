@@ -2974,3 +2974,24 @@ button {
 .member-role {
   opacity: 0.7;
 }
+
+.insta-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.insta-link:hover {
+  text-decoration: underline;
+}
+
+.insta-icon {
+  color: white;
+  margin-top: 20px;
+  display: inline-block;
+  transition: 0.3s;
+}
+
+.insta-icon:hover {
+  transform: scale(1.2);
+}

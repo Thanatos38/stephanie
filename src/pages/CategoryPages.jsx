@@ -2,6 +2,7 @@ import "../App.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { client } from "../sanity";
+import { FaInstagram } from "react-icons/fa";
 export default function CategoryPage({ category, title, subtitle, darkMode, setDarkMode }) {
   const [projects, setProjects] = useState([]);
   const navigate = useNavigate();
@@ -144,6 +145,15 @@ export default function CategoryPage({ category, title, subtitle, darkMode, setD
       <button type="submit">Send Message</button>
 
     </form>
+
+      <a
+      href="https://www.instagram.com/stephanie.traut.design?igsh=NTQ5Ymo2MzVqbTBv"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="insta-icon"
+    >
+      <FaInstagram size={24} />
+    </a>
 
   </div>
 
