@@ -3,11 +3,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { client } from "../sanity";
 import { FaInstagram } from "react-icons/fa";
+import { useRef } from "react";
+import emailjs from "emailjs-com";
 
 export default function ProjectDetail({ darkMode, setDarkMode }) {
   const { id } = useParams();
   const navigate = useNavigate();
-
+  const form = useRef();
   const [menuOpen, setMenuOpen] = useState(false);
   const [project, setProject] = useState(null);
 
@@ -23,6 +25,28 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
       "_blank"
     );
   };
+
+  const sendEmail = (e) => {
+  e.preventDefault();
+
+  emailjs
+    .sendForm(
+      "service_yfqxm7b",
+      "template_ymqtwfr",
+      form.current,
+      "JnaqPcJ-xA1ZrWQep"
+    )
+    .then(
+      () => {
+        alert("Message sent successfully!");
+        form.current.reset();
+      },
+      (error) => {
+        console.error(error);
+        alert("Failed to send message.");
+      }
+    );
+};
 
   useEffect(() => {
     client.fetch(
@@ -134,13 +158,13 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
             <h4>Team</h4>
 
             {project.team?.map((member, index) => (
-              <div key={index} className="team-member">
-                <p>
-                  <span className="member-name">{member.name}</span> —{" "}
-                  <span className="member-role">{member.role}</span>
-                </p>
-              </div>
-            ))}
+  <div key={index} className="team-member">
+    <p>
+      <span className="member-name">{member.name}</span> —{" "}
+      <span className="member-role">{member.role}</span>
+    </p>
+  </div>
+))}
 
           </div>
 
@@ -169,20 +193,34 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
           <h1>Get in Touch</h1>
           <p>We’d love to hear from you! Reach out today.</p>
 
-          <form className="contact-form">
+          <form className="contact-form" onSubmit={sendEmail} ref={form}>
 
-            <label>Name</label>
-            <input type="text" placeholder="Enter your name" />
+  <label>Name</label>
+  <input
+    type="text"
+    name="user_name"
+    placeholder="Enter your name"
+    required
+  />
 
-            <label>Email</label>
-            <input type="email" placeholder="Enter your email" />
+  <label>Email</label>
+  <input
+    type="email"
+    name="user_email"
+    placeholder="Enter your email"
+    required
+  />
 
-            <label>Message</label>
-            <textarea placeholder="Type your message"></textarea>
+  <label>Message</label>
+  <textarea
+    name="message"
+    placeholder="Type your message"
+    required
+  ></textarea>
 
-            <button type="submit">Send Message</button>
+  <button type="submit">Send Message</button>
 
-          </form>
+</form>
 
             <a
             href="https://www.instagram.com/stephanie.traut.design?igsh=NTQ5Ymo2MzVqbTBv"

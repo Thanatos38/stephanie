@@ -2995,3 +2995,23 @@ button {
 .insta-icon:hover {
   transform: scale(1.2);
 }
+
+.team-member p {
+  display: flex;
+  flex-wrap: wrap; /* allows wrap only if needed */
+  gap: 5px;
+}
+
+.member-name {
+  font-weight: 600;
+}
+
+.member-role {
+  opacity: 0.7;
+}
+
+.team-member p {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
