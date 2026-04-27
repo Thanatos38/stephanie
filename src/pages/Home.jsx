@@ -35,7 +35,9 @@ export default function Home({ darkMode, setDarkMode }) {
         shortDesc,
         timeline,
         team,
-        "coverImage": coverImage.asset->url
+        "coverImage": coverImage.asset->url,
+        "images": images[].asset->url,\
+        "homepageImages": homepageImages[].asset->url
       }`)
       .then(setProjects);
   }, []);
@@ -125,10 +127,10 @@ const changeLanguage = (lang) => {
         </div>
 
         <nav className="nav-links">
-          <a onClick={() => navigate("/about")}>About</a>
           <a onClick={() => navigate("/set")}>Set</a>
-          <a onClick={() => navigate("/costume")}>Costume</a>
           <a onClick={() => navigate("/stage")}>Stage</a>
+          <a onClick={() => navigate("/costume")}>Costume</a>
+          <a onClick={() => navigate("/about")}>About</a>
           <a onClick={() => navigate("/contact")}>Contact</a>
         </nav>
 
@@ -186,29 +188,24 @@ const changeLanguage = (lang) => {
       {/* PROJECTS */}
       <section className="projects-showcase">
         {projects.map((project, index) => (
-          <div
-            className={`showcase-item ${index % 2 !== 0 ? "reverse" : ""}`}
-            key={project._id}
-            onClick={() => navigate(`/project/${project._id}`)}
-          >
-           <div
-  className="showcase-item"
-  key={project._id}
-  onClick={() => navigate(`/project/${project._id}`)}
->
-  <div className="showcase-img">
-    <img src={project.coverImage} alt="" />
+  <div
+    className={`showcase-item ${index % 2 !== 0 ? "reverse" : ""}`}
+    key={project._id}
+    onClick={() => navigate(`/project/${project._id}`)}
+  >
+    {/* LEFT BIG IMAGE */}
+    <div className="showcase-img main-img">
+      <img src={project.coverImage} alt="" />
+    </div>
 
-    <div className="overlay">
-      <h2>{project.title?.en || project.title}</h2>
+    {/* RIGHT COLLAGE */}
+    <div className="showcase-collage">
+      {project.homepageImages?.map((img, i) => (
+    <img key={i} src={img} alt="" />
+  ))}
     </div>
   </div>
-</div>
-            <div className="showcase-img">
-              <img src={project.coverImage} alt="" />
-            </div>
-          </div>
-        ))}
+))}
       </section>
 
       {/* CONTACT */}

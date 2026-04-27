@@ -56,7 +56,7 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
         tagline,
         shortDesc,
         longDesc,
-        team,
+        "team": team[]{name, role, link}, 
         client,
         date,
         theme,
@@ -123,6 +123,15 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
         <img src={project.coverImage} alt="" />
       </section>
 
+      {/* GALLERY */}
+     <section className="project-gallery">
+  <div className="gallery-grid">
+    {project.images?.slice(0, 6).map((img, i) => (
+      <img key={i} src={img} alt="" />
+    ))}
+  </div>
+</section>
+
       {/* 🔥 NEW CLEAN INTRO SECTION */}
       <section className="project-intro">
 
@@ -154,19 +163,29 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
             <p>{project.date}</p>
           </div>
 
-          <div>
-            <h4>Team</h4>
-
-            {project.team?.map((member, index) => (
-  <div key={index} className="team-member">
-    <p>
-      <span className="member-name">{member.name}</span> —{" "}
-      <span className="member-role">{member.role}</span>
-    </p>
-  </div>
-))}
-
-          </div>
+         <div>
+  <h4>Team</h4>
+  {project.team?.map((member, index) => (
+    <div key={index} className="team-member">
+      <p>
+        {member.link ? (
+          <a
+            href={member.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="team-member-link"
+          >
+            {member.name}
+          </a>
+        ) : (
+          <span className="member-name">{member.name}</span>
+        )}
+        {" — "}
+        <span className="member-role">{member.role}</span>
+      </p>
+    </div>
+  ))}
+</div>
 
         </div>
 
@@ -179,12 +198,7 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
         </div>
       </section>
 
-      {/* GALLERY */}
-      <section className="project-gallery">
-        {project.images?.map((img, i) => (
-          <img key={i} src={img} alt="" />
-        ))}
-      </section>
+      
 
       {/* FOOTER */}
       <section className="contact">
