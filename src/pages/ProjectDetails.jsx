@@ -62,6 +62,10 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
         theme,
         highlights,
         "coverImage": coverImage.asset->url,
+        "gallery": gallery | order(orderRank){
+    layout,
+    "url": image.asset->url
+  },
         "images": images[].asset->url
       }`,
       { id }
@@ -69,6 +73,14 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
   }, [id]);
 
   if (!project) return <div>Loading...</div>;
+
+  const galleryData =
+  project.gallery?.length > 0
+    ? project.gallery
+    : project.images?.map((img, i) => ({
+        url: img,
+        layout: i % 5 === 0 ? "full" : "small",
+      }));
 
   return (
     <div className="project-detail-page">
@@ -141,12 +153,15 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
         <img src={project.coverImage} alt="" />
       </section>
 
-      {/* GALLERY */}
      <section className="project-gallery">
-  <div className="gallery-grid">
-    {project.images?.slice(0, 6).map((img, i) => (
-      <img key={i} src={img} alt="" />
+  <div className="gallery">
+
+    {galleryData?.map((item, i) => (
+      <div key={i} className={`gallery-item ${item.layout}`}>
+        <img src={item.url} alt="" />
+      </div>
     ))}
+
   </div>
 </section>
 

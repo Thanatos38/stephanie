@@ -3677,3 +3677,141 @@ img {
   }
 }
 
+.gallery-grid img {
+  width: 100%;
+  height: auto;        /* 👈 KEY FIX */
+  object-fit: contain; /* 👈 prevents cropping */
+  display: block;
+}
+.gallery-grid {
+  column-count: 3;
+  column-gap: 15px;
+}
+
+.gallery-grid img {
+  width: 100%;
+  margin-bottom: 15px;
+  display: block;
+  break-inside: avoid;
+}
+
+
+.gallery-grid {
+  column-count: 3;
+  column-gap: 15px;
+}
+
+.gallery-grid img {
+  width: 100%;
+  margin-bottom: 15px;
+  display: block;
+  break-inside: avoid;
+}
+
+@media (max-width: 900px) {
+  .gallery-grid {
+    column-count: 2;
+  }
+}
+
+@media (max-width: 500px) {
+  .gallery-grid {
+    column-count: 1;
+  }
+}
+
+
+/* 🔥 FINAL GALLERY FIX */
+
+.project-gallery {
+  column-count: 3;
+  column-gap: 20px;
+  padding: 60px 100px;
+}
+
+/* 🔥 IMPORTANT: override all previous rules */
+.project-gallery img {
+  width: 100%;
+  height: auto !important;
+  object-fit: contain !important;
+  margin-bottom: 20px;
+  display: block;
+  break-inside: avoid;
+  border-radius: 8px;
+}
+
+/* 📱 responsive */
+@media (max-width: 900px) {
+  .project-gallery {
+    column-count: 2;
+  }
+}
+
+@media (max-width: 500px) {
+  .project-gallery {
+    column-count: 1;
+  }
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+/* layout control */
+
+
+
+
+
+
+
+
+
+
+/* ===== MASONRY GALLERY FIX ===== */
+.project-gallery {
+  padding: 60px 100px;
+  background: var(--bg);
+}
+
+.gallery {
+  column-count: 2;
+  column-gap: 12px;
+}
+
+.gallery-item {
+  break-inside: avoid;
+  margin-bottom: 12px;
+}
+
+.gallery-item img {
+  width: 100%;
+  height: auto !important;        /* KEY - let image breathe */
+  object-fit: cover;
+  display: block;
+  border-radius: 4px;
+}
+
+/* override old fixed-height rules */
+.project-gallery img {
+  height: auto !important;
+}
+
+/* responsive */
+@media (max-width: 900px) {
+  .gallery {
+    column-count: 2;
+  }
+}
+
+@media (max-width: 500px) {
+  .gallery {
+    column-count: 1;
+  }
+}
+
+.gallery-item.full {
+  column-span: all;   /* spans all 3 columns */
+}
