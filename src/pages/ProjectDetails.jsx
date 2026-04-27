@@ -184,52 +184,30 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
         </div>
 
         {/* RIGHT */}
-        <div className="intro-right">
+       <div className="intro-right">
 
-          {project.client && (
-  <div>
-    <h4>Client</h4>
-    <p>{project.client}</p>
-  </div>
-)}
+  {project.client && (
+    <p className="meta-item">{project.client}</p>
+  )}
 
-          {project.date && (
-  <div>
-    <h4>Date</h4>
-    <p>
+  {project.date && (
+    <p className="meta-item">
       {new Date(project.date).toLocaleDateString("en-US", {
         year: "numeric",
         month: "long",
       })}
     </p>
-  </div>
-)}
+  )}
 
-         <div>
-  <h4>Team</h4>
   {project.team?.map((member, index) => (
-    <div key={index} className="team-member">
-      <p>
-        {member.link ? (
-          <a
-            href={member.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="team-member-link"
-          >
-            {member.name}
-          </a>
-        ) : (
-          <span className="member-name">{member.name}</span>
-        )}
-        {" — "}
-        <span className="member-role">{member.role}</span>
-      </p>
-    </div>
+    <p key={index} className="meta-item">
+      <span className="name">{member.name}</span>
+      {" — "}
+      <span className="role">{member.role}</span>
+    </p>
   ))}
-</div>
 
-        </div>
+</div>
 
       </section>
 
