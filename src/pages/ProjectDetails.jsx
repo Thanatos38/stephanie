@@ -201,10 +201,10 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
 
   {project.team?.map((member, index) => (
     <p key={index} className="meta-item">
-      <span className="name">{member.name}</span>
-      {" — "}
-      <span className="role">{member.role}</span>
-    </p>
+  <span className="role">{member.role}</span>
+  <br />
+  <span className="name">{member.name}</span>
+</p>
   ))}
 
 </div>

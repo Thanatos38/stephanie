@@ -4225,3 +4225,13 @@ img {
   }
 
 }
+
+.meta-item .role {
+  font-weight: 600;   /* 🔥 bold */
+  color: #555;
+}
+
+.meta-item .name {
+  font-weight: 400;   /* normal */
+  color: #999;
+}
