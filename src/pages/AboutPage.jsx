@@ -37,6 +37,17 @@ const groupedTimeline = formattedTimeline
     return acc;
   }, {});
 
+  const changeLanguage = (lang) => {
+  if (lang === "en") return;
+
+  const url = window.location.origin;
+
+  window.open(
+    `https://translate.google.com/translate?sl=en&tl=de&u=${encodeURIComponent(url)}`,
+    "_blank"
+  );
+};
+
   return (
     <div className={`about-page ${darkMode ? "dark" : "light"}`}>
 
@@ -44,15 +55,32 @@ const groupedTimeline = formattedTimeline
 
       {/* NAVBAR */}
       <header className="navbar scrolled">
+
+        {menuOpen && (
+  <div className="menu-overlay">
+    <button className="close-btn" onClick={() => setMenuOpen(false)}>
+      ✕
+    </button>
+
+    <div className="menu-links">
+      <button onClick={() => { navigate("/"); setMenuOpen(false); }}>Home</button>
+      <button onClick={() => { navigate("/about"); setMenuOpen(false); }}>About</button>
+      <button onClick={() => { navigate("/set"); setMenuOpen(false); }}>Set</button>
+      <button onClick={() => { navigate("/costume"); setMenuOpen(false); }}>Costume</button>
+      <button onClick={() => { navigate("/stage"); setMenuOpen(false); }}>Stage</button>
+      <button onClick={() => { navigate("/contact"); setMenuOpen(false); }}>Contact</button>
+    </div>
+  </div>
+)}
         <div className="logo" onClick={() => navigate("/")}>
-          Stephanie
+          Stephanie Traut
         </div>
 
-        <nav className="nav-links">
-          <a onClick={() => navigate("/about")}>About</a>
+       <nav className="nav-links">
           <a onClick={() => navigate("/set")}>Set</a>
-          <a onClick={() => navigate("/costume")}>Costume</a>
           <a onClick={() => navigate("/stage")}>Stage</a>
+          <a onClick={() => navigate("/costume")}>Costume</a>
+          <a onClick={() => navigate("/about")}>About</a>
           <a onClick={() => navigate("/contact")}>Contact</a>
         </nav>
 
@@ -65,6 +93,11 @@ const groupedTimeline = formattedTimeline
               <div className="toggle-thumb"></div>
             </div>
           </button>
+
+          <div className="lang-switch">
+  <button onClick={() => changeLanguage("en")}>EN</button>
+  <button onClick={() => changeLanguage("de")}>DE</button>
+</div>
 
           <div
             className={`hamburger ${menuOpen ? "active" : ""}`}
@@ -80,7 +113,7 @@ const groupedTimeline = formattedTimeline
       {/* HERO */}
       <section className="about-hero-new">
         <div className="about-hero-image">
-          <img src="/images/img1.jpg" alt="Stephanie Traut" />
+          <img src="/images/Steph.jpeg" alt="Stephanie Traut" />
         </div>
 
         <div className="about-hero-text">

@@ -123,7 +123,7 @@ const changeLanguage = (lang) => {
       <header className={`navbar ${scrolled ? "scrolled" : ""}`}>
 
         <div className="logo" onClick={() => navigate("/")}>
-          Stephanie
+          Stephanie Traut
         </div>
 
         <nav className="nav-links">
@@ -171,10 +171,10 @@ const changeLanguage = (lang) => {
 
           <div className="menu-links">
             <button onClick={() => navigate("/")}>Home</button>
-            <button onClick={() => navigate("/about")}>About</button>
             <button onClick={() => navigate("/set")}>Set</button>
             <button onClick={() => navigate("/costume")}>Costume</button>
             <button onClick={() => navigate("/stage")}>Stage</button>
+            <button onClick={() => navigate("/about")}>About</button>
             <button onClick={() => navigate("/contact")}>Contact</button>
           </div>
         </div>
@@ -186,27 +186,31 @@ const changeLanguage = (lang) => {
 </section>
 
       {/* PROJECTS */}
-      <section className="projects-showcase">
-        {projects.map((project, index) => (
-  <div
-    className={`showcase-item ${index % 2 !== 0 ? "reverse" : ""}`}
-    key={project._id}
-    onClick={() => navigate(`/project/${project._id}`)}
-  >
-    {/* LEFT BIG IMAGE */}
-    <div className="showcase-img main-img">
-      <img src={project.coverImage} alt="" />
-    </div>
+     <section className="projects-showcase">
+  <div className="home-projects">   {/* ✅ ADDED WRAPPER */}
 
-    {/* RIGHT COLLAGE */}
-    <div className="showcase-collage">
-      {project.homepageImages?.map((img, i) => (
-    <img key={i} src={img} alt="" />
-  ))}
-    </div>
-  </div>
-))}
-      </section>
+    {projects.map((project, index) => (
+      <div
+        className={`showcase-item ${index % 2 !== 0 ? "reverse" : ""}`}
+        key={project._id}
+        onClick={() => navigate(`/project/${project._id}`)}
+      >
+        {/* LEFT BIG IMAGE */}
+        <div className="showcase-img main-img">
+          <img src={project.coverImage} alt="" />
+        </div>
+
+        {/* RIGHT COLLAGE */}
+        <div className="showcase-collage">
+          {project.homepageImages?.map((img, i) => (
+            <img key={i} src={img} alt="" />
+          ))}
+        </div>
+      </div>
+    ))}
+
+  </div>   {/* ✅ END WRAPPER */}
+</section>
 
       {/* CONTACT */}
       <section className="contact">

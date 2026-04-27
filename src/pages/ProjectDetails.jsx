@@ -76,15 +76,33 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
       {/* NAVBAR */}
       <header className="navbar scrolled">
 
+        {menuOpen && (
+  <div className="menu-overlay">
+    <button className="close-btn" onClick={() => setMenuOpen(false)}>
+      ✕
+    </button>
+
+    <div className="menu-links">
+      <button onClick={() => navigate("/")}>Home</button>
+      <button onClick={() => navigate("/set")}>Set</button>
+      <button onClick={() => navigate("/stage")}>Stage</button>
+      <button onClick={() => navigate("/costume")}>Costume</button>
+      <button onClick={() => navigate("/about")}>About</button>
+      <button onClick={() => navigate("/contact")}>Contact</button>
+    </div>
+  </div>
+)}
+
+  
         <div className="logo" onClick={() => navigate("/")}>
-          Stephanie
+          Stephanie Traut
         </div>
 
         <nav className="nav-links">
-          <a onClick={() => navigate("/about")}>About</a>
           <a onClick={() => navigate("/set")}>Set</a>
-          <a onClick={() => navigate("/costume")}>Costume</a>
           <a onClick={() => navigate("/stage")}>Stage</a>
+          <a onClick={() => navigate("/costume")}>Costume</a>
+          <a onClick={() => navigate("/about")}>About</a>
           <a onClick={() => navigate("/contact")}>Contact</a>
         </nav>
 

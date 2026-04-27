@@ -32,6 +32,17 @@ export default function CategoryPage({ category, title, subtitle, darkMode, setD
       .then(setProjects);
   }, [category]);
 
+  const changeLanguage = (lang) => {
+  if (lang === "en") return;
+
+  const url = window.location.origin;
+
+  window.open(
+    `https://translate.google.com/translate?sl=en&tl=de&u=${encodeURIComponent(url)}`,
+    "_blank"
+  );
+};
+
   return (
     <div className="category-page">
         
@@ -41,15 +52,15 @@ export default function CategoryPage({ category, title, subtitle, darkMode, setD
 
         {/* LEFT LOGO */}
         <div className="logo" onClick={() => navigate("/")}>
-          Stephanie
+          Stephanie Traut
         </div>
 
         {/* CENTER MENU */}
         <nav className="nav-links">
-          <a onClick={() => navigate("/about")}>About</a>
           <a onClick={() => navigate("/set")}>Set</a>
-          <a onClick={() => navigate("/costume")}>Costume</a>
           <a onClick={() => navigate("/stage")}>Stage</a>
+          <a onClick={() => navigate("/costume")}>Costume</a>
+          <a onClick={() => navigate("/about")}>About</a>
           <a onClick={() => navigate("/contact")}>Contact</a>
         </nav>
 
@@ -65,6 +76,11 @@ export default function CategoryPage({ category, title, subtitle, darkMode, setD
       <div className="toggle-thumb"></div>
     </div>
   </button>
+
+  <div className="lang-switch">
+  <button onClick={() => changeLanguage("en")}>EN</button>
+  <button onClick={() => changeLanguage("de")}>DE</button>
+</div>
 
   {/* HAMBURGER */}
   <div
@@ -87,10 +103,10 @@ export default function CategoryPage({ category, title, subtitle, darkMode, setD
 
     <div className="menu-links">
       <button onClick={() => navigate("/")}>Home</button>
-      <button onClick={() => navigate("/about")}>About</button>
       <button onClick={() => navigate("/set")}>Set</button>
-      <button onClick={() => navigate("/costume")}>Costume</button>
       <button onClick={() => navigate("/stage")}>Stage</button>
+      <button onClick={() => navigate("/costume")}>Costume</button>
+      <button onClick={() => navigate("/about")}>About</button>
       <button onClick={() => navigate("/contact")}>Contact</button>
     </div>
 
