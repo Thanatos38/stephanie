@@ -171,15 +171,24 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
         {/* RIGHT */}
         <div className="intro-right">
 
-          <div>
-            <h4>Client</h4>
-            <p>{project.client}</p>
-          </div>
+          {project.client && (
+  <div>
+    <h4>Client</h4>
+    <p>{project.client}</p>
+  </div>
+)}
 
-          <div>
-            <h4>Date</h4>
-            <p>{project.date}</p>
-          </div>
+          {project.date && (
+  <div>
+    <h4>Date</h4>
+    <p>
+      {new Date(project.date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+      })}
+    </p>
+  </div>
+)}
 
          <div>
   <h4>Team</h4>
