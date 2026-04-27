@@ -113,7 +113,7 @@ const groupedTimeline = formattedTimeline
       {/* HERO */}
       <section className="about-hero-new">
         <div className="about-hero-image">
-          <img src="/images/Steph.jpeg" alt="Stephanie Traut" />
+          <img src="/images/steph.jpeg" alt="Stephanie Traut" />
         </div>
 
         <div className="about-hero-text">
