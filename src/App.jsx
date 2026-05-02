@@ -8,6 +8,7 @@ import CostumePage from "./pages/CostumePage";
 import AboutPage from "./pages/AboutPage";
 import ProjectDetail from "./pages/ProjectDetails";
 import Contact from "./pages/Contact";
+import FreeCanvasEditor from "./pages/FreeCanvasEditor";
 
 
 export default function App() {
@@ -29,6 +30,17 @@ useEffect(() => {
   document.body.className = darkMode ? "dark" : "light";
 }, [darkMode]);
 
+function ProtectedEditor() {
+  const password = prompt("Enter admin password");
+
+  if (password !== "admin123") {
+    window.location.href = "/";
+    return null;
+  }
+
+  return <FreeCanvasEditor />;
+}
+
   return (
   <div className={darkMode ? "dark" : "light"}>
   
@@ -40,6 +52,7 @@ useEffect(() => {
       <Route path="/about" element={<AboutPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
       <Route path="/project/:id" element={<ProjectDetail darkMode={darkMode} setDarkMode={setDarkMode} />} />
       <Route path="/contact" element={<Contact darkMode={darkMode} setDarkMode={setDarkMode} />} />
+      <Route path="/editor" element={<ProtectedEditor  />} />
     </Routes>
   </div>
 );

@@ -4235,3 +4235,34 @@ img {
   font-weight: 400;   /* normal */
   color: #999;
 }
+
+.project-meta {
+  margin: 20px 0;
+}
+
+.meta-item {
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #000; /* darker than before */
+}
+
+.role {
+  font-weight: 600;
+}
+
+.name {
+  color: #000 !important;; /* slightly lighter than role */
+}
+
+body.dark .meta-item {
+  color: #ccc;
+}
+
+.role {
+  font-weight: 600;
+  color: #000 !important; /* darker, near black */
+}
+
+body.dark .name {
+  color: #aaa;
+}
