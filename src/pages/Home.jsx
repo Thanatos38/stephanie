@@ -339,7 +339,7 @@ export default function Home({ darkMode, setDarkMode }) {
       {/* ── CANVAS SECTION ── */}
       <section className="projects-showcase">
         {customLayout !== null ? (
-          <div style={{ position: "relative", minHeight: "100vh" }}>
+          <div style={{ position: "relative", height: `${canvasHeight}px` }}>
             {customLayout.map((el, i) => (
               <Rnd
                 key={el._key || i}
