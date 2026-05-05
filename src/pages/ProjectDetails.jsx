@@ -19,7 +19,8 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
   const form = useRef();
   const [menuOpen, setMenuOpen] = useState(false);
   const [project, setProject] = useState(null);
-  const [canvasLayout, setCanvasLayout] = useState(null); // null = loading
+  const [canvasLayout, setCanvasLayout] = useState(null);
+  const [canvasHeight, setCanvasHeight] = useState(2000);
   const [allImages, setAllImages] = useState([]);
   const [showPicker, setShowPicker] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -61,10 +62,7 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
 
     const initCanvas = async () => {
       try {
-        const existing = await client.fetch(
-          `*[_id == $docId][0]`,
-          { docId }
-        );
+        const existing = await client.fetch(`*[_id == $docId][0]`, { docId });
 
         if (!existing) {
           await client.createIfNotExists({
@@ -72,14 +70,18 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
             _type: "projectCanvas",
             projectId: id,
             elements: [],
+            canvasHeight: 2000,
           });
         }
 
         const data = await client.fetch(
-          `*[_id == $docId][0]{ elements }`,
+          `*[_id == $docId][0]{ elements, canvasHeight }`,
           { docId }
         );
+
         setCanvasLayout(data?.elements || []);
+        setCanvasHeight(data?.canvasHeight || 2000);
+
       } catch (err) {
         console.error("Canvas init error:", err);
         setCanvasLayout([]);
@@ -134,7 +136,7 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
     try {
       await client
         .patch(docId)
-        .set({ elements: canvasLayout })
+        .set({ elements: canvasLayout, canvasHeight })
         .commit();
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -176,7 +178,6 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
           layout: i % 5 === 0 ? "full" : "small",
         }));
 
-  // Does this project have a canvas with images?
   const hasCanvas = canvasLayout !== null && canvasLayout.length > 0;
 
   return (
@@ -241,6 +242,18 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
           <span style={{ opacity: 0.55, fontSize: "0.7rem" }}>
             Drag to move · Corner to resize · ✕ to remove
           </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <span style={{ color: "#d4c5a9", fontSize: "0.7rem" }}>Height:</span>
+            <button
+              style={btnStyle("#3a3a3a", "#d4c5a9")}
+              onClick={() => setCanvasHeight(h => Math.max(500, h - 500))}
+            >− Shorter</button>
+            <span style={{ color: "#fff", fontSize: "0.7rem" }}>{canvasHeight}px</span>
+            <button
+              style={btnStyle("#3a3a3a", "#d4c5a9")}
+              onClick={() => setCanvasHeight(h => h + 500)}
+            >+ Taller</button>
+          </div>
           <div style={{ display: "flex", gap: "0.75rem", marginLeft: "auto" }}>
             <button style={btnStyle("#3a3a3a", "#d4c5a9")} onClick={() => setShowPicker(true)}>
               + Add Image
@@ -286,9 +299,9 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
         </div>
       )}
 
-      {/* ── FREE-FORM CANVAS (shown when there are canvas images, or in edit mode) ── */}
+      {/* ── FREE-FORM CANVAS ── */}
       {(hasCanvas || isEditMode) && (
-        <section style={{ position: "relative", minHeight: "80vh", background: "#faf9f6" }}>
+        <section style={{ position: "relative", height: `${canvasHeight}px`, background: "#faf9f6" }}>
           {canvasLayout?.map((el, i) => (
             <Rnd
               key={el._key || i}
