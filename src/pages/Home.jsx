@@ -27,32 +27,38 @@ export default function Home({ darkMode, setDarkMode }) {
   const navigate = useNavigate();
   const form = useRef();
   const isEditMode = useEditMode();
+  const [canvasHeight, setCanvasHeight] = useState(2000);
 
   // ── Fetch / init layout ─────────────────────────────────────────────────────
   useEffect(() => {
-    const initLayout = async () => {
-      try {
-        const existing = await client.fetch(`*[_id == "homepageLayout"][0]`);
+  const initLayout = async () => {
+    try {
+      const existing = await client.fetch(`*[_id == "homepageLayout"][0]`);
 
-        if (!existing) {
-          await client.createIfNotExists({
-            _id: "homepageLayout",
-            _type: "layout",
-            elements: [],
-          });
-        }
-
-        const data = await client.fetch(
-          `*[_type == "layout" && _id == "homepageLayout"][0]`
-        );
-        if (data) setCustomLayout(data.elements || []);
-      } catch (err) {
-        console.error("Layout init error:", err);
+      if (!existing) {
+        await client.createIfNotExists({
+          _id: "homepageLayout",
+          _type: "layout",
+          elements: [],
+          canvasHeight: 2000,
+        });
       }
-    };
 
-    initLayout();
-  }, []);
+      const data = await client.fetch(
+        `*[_type == "layout" && _id == "homepageLayout"][0]`
+      );
+
+      if (data) {
+        setCustomLayout(data.elements || []);
+        setCanvasHeight(data.canvasHeight || 2000);
+      }
+    } catch (err) {
+      console.error("Layout init error:", err);
+    }
+  };
+
+  initLayout();
+}, []);
 
   // ── Fetch all project images for the picker (with project ID) ──────────────
   useEffect(() => {
@@ -171,7 +177,7 @@ export default function Home({ darkMode, setDarkMode }) {
     try {
       await client
         .patch("homepageLayout")
-        .set({ elements: customLayout })
+        .set({ elements: customLayout, canvasHeight  })
         .commit();
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -263,30 +269,42 @@ export default function Home({ darkMode, setDarkMode }) {
 
       {/* ── EDIT MODE TOOLBAR ── */}
       {isEditMode && (
-        <div style={toolbarStyle}>
-          <span style={{ fontWeight: 600, color: "#d4c5a9", letterSpacing: "0.08em" }}>
-            ✦ Edit Mode
-          </span>
-          <span style={{ opacity: 0.55, fontSize: "0.7rem" }}>
-            Drag to move · Corner to resize · Click ✕ to remove
-          </span>
-          <div style={{ display: "flex", gap: "0.75rem", marginLeft: "auto" }}>
-            <button
-              style={btnStyle("#3a3a3a", "#d4c5a9")}
-              onClick={() => setShowPicker(true)}
-            >
-              + Add Image
-            </button>
-            <button
-              style={btnStyle(saved ? "#4a7c4a" : "#d4c5a9", saved ? "#fff" : "#111")}
-              onClick={saveLayout}
-              disabled={saving}
-            >
-              {saving ? "Saving…" : saved ? "✓ Saved" : "Save Layout"}
-            </button>
-          </div>
-        </div>
-      )}
+  <div style={toolbarStyle}>
+    <span style={{ fontWeight: 600, color: "#d4c5a9", letterSpacing: "0.08em" }}>
+      ✦ Edit Mode
+    </span>
+    <span style={{ opacity: 0.55, fontSize: "0.7rem" }}>
+      Drag to move · Corner to resize · Click ✕ to remove
+    </span>
+    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+      <span style={{ color: "#d4c5a9", fontSize: "0.7rem" }}>Height:</span>
+      <button
+        style={btnStyle("#3a3a3a", "#d4c5a9")}
+        onClick={() => setCanvasHeight(h => Math.max(500, h - 500))}
+      >− Shorter</button>
+      <span style={{ color: "#fff", fontSize: "0.7rem" }}>{canvasHeight}px</span>
+      <button
+        style={btnStyle("#3a3a3a", "#d4c5a9")}
+        onClick={() => setCanvasHeight(h => h + 500)}
+      >+ Taller</button>
+    </div>
+    <div style={{ display: "flex", gap: "0.75rem", marginLeft: "auto" }}>
+      <button
+        style={btnStyle("#3a3a3a", "#d4c5a9")}
+        onClick={() => setShowPicker(true)}
+      >
+        + Add Image
+      </button>
+      <button
+        style={btnStyle(saved ? "#4a7c4a" : "#d4c5a9", saved ? "#fff" : "#111")}
+        onClick={saveLayout}
+        disabled={saving}
+      >
+        {saving ? "Saving…" : saved ? "✓ Saved" : "Save Layout"}
+      </button>
+    </div>
+  </div>
+)}
 
       {/* ── IMAGE PICKER MODAL ── */}
       {isEditMode && showPicker && (
