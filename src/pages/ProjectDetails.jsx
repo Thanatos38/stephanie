@@ -6,7 +6,7 @@ import { FaInstagram } from "react-icons/fa";
 import emailjs from "emailjs-com";
 import { Rnd } from "react-rnd";
 import Navbar from "../components/Navbar";
-import { useTranslate, useTranslateObject } from "../hooks/useTranslation";
+import { useTranslate, useTranslateObject } from "../hooks/Usetranslation";
 
 const EDIT_KEY = import.meta.env.VITE_EDIT_KEY || "stephanie2024";
 

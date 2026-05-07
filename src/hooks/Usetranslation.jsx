@@ -2,7 +2,7 @@
 // Use this hook in any component to translate dynamic content
 
 import { useState, useEffect } from "react";
-import { useLang } from "../context/LanguageContext";
+import { useLang } from "../context/Languagecontext";
 
 // Translate a single string
 export function useTranslate(text) {
