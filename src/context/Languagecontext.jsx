@@ -23,7 +23,9 @@ async function translateText(text, targetLang) {
     });
 
     const data = await response.json();
-    const translated = data.translations?.[0]?.text || text;
+    console.log("DeepL response:", data);
+
+const translated = data.translations?.[0]?.text || text;
     translationCache[cacheKey] = translated;
     return translated;
   } catch (err) {

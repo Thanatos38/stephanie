@@ -210,7 +210,9 @@ const tContact = useTranslate("Contact");
       {/* ── NAVBAR ── */}
       <header className={`navbar ${scrolled ? "scrolled" : ""}`}>
         <div className="logo" onClick={() => navigate("/")}>Stephanie Traut</div>
-
+<div style={{ position: "fixed", top: 100, right: 20, zIndex: 99999 }}>
+  Current Language: {lang}
+</div>
         <nav className="nav-links">
   <a onClick={() => navigate("/set")}>{tSet}</a>
   <a onClick={() => navigate("/stage")}>{tStage}</a>
