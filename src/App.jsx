@@ -6,7 +6,7 @@ import SetPage from "./pages/SetPage";
 import StagePage from "./pages/StagePage";
 import CostumePage from "./pages/CostumePage";
 import AboutPage from "./pages/AboutPage";
-import ProjectDetail from "./pages/ProjectDetail";
+import ProjectDetail from "./pages/ProjectDetails";
 import Contact from "./pages/Contact";
 
 
