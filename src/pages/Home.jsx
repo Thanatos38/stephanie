@@ -5,6 +5,8 @@ import { client } from "../sanity";
 import emailjs from "emailjs-com";
 import { Rnd } from "react-rnd";
 import { FaInstagram } from "react-icons/fa";
+import { useLang } from "../context/LanguageContext";
+import { useTranslate } from "../hooks/useTranslation";
 
 const EDIT_KEY = import.meta.env.VITE_EDIT_KEY || "stephanie2024";
 
@@ -27,6 +29,15 @@ export default function Home({ darkMode, setDarkMode }) {
   const navigate = useNavigate();
   const form = useRef();
   const isEditMode = useEditMode();
+  const { lang, switchLanguage, translating } = useLang();
+
+// Static text translations
+const tGetInTouch = useTranslate("Get in Touch");
+const tReach = useTranslate("We'd love to hear from you! Reach out today.");
+const tName = useTranslate("Enter your name");
+const tEmail = useTranslate("Enter your email");
+const tMessage = useTranslate("Type your message");
+const tSend = useTranslate("Send Message");
   const [canvasHeight, setCanvasHeight] = useState(2000);
 
   // ── Fetch / init layout ─────────────────────────────────────────────────────
@@ -189,14 +200,16 @@ export default function Home({ darkMode, setDarkMode }) {
   };
 
   // ── Language ────────────────────────────────────────────────────────────────
-  const changeLanguage = (lang) => {
-    if (lang === "en") return;
-    const url = window.location.origin;
-    window.open(
-      `https://translate.google.com/translate?sl=en&tl=de&u=${encodeURIComponent(url)}`,
-      "_blank"
-    );
-  };
+  <div className="lang-switch">
+  <button
+    onClick={() => switchLanguage("EN")}
+    style={{ fontWeight: lang === "EN" ? 700 : 400, opacity: translating ? 0.5 : 1 }}
+  >EN</button>
+  <button
+    onClick={() => switchLanguage("DE")}
+    style={{ fontWeight: lang === "DE" ? 700 : 400, opacity: translating ? 0.5 : 1 }}
+  >{translating ? "…" : "DE"}</button>
+</div>
 
   // ── Email ───────────────────────────────────────────────────────────────────
   const sendEmail = (e) => {

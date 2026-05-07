@@ -3,183 +3,109 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { client } from "../sanity";
 import { FaInstagram } from "react-icons/fa";
+import Navbar from "../components/Navbar";
+import { useTranslate, useTranslateArray } from "../hooks/useTranslation";
 
 export default function AboutPage({ darkMode, setDarkMode }) {
   const navigate = useNavigate();
   const [timeline, setTimeline] = useState([]);
-  const [menuOpen, setMenuOpen] = useState(false);
 
- useEffect(() => {
-  client.fetch(`*[_type=="project" && showInTimeline==true && defined(date)] 
-  | order(date desc){
-    _id,
-    title,
-    date,  // 👈 safest version
-    shortDesc,
-    "coverImage": coverImage.asset->url
-}`)
-    .then(setTimeline);
-}, []);
-const formattedTimeline = timeline.map(item => ({
-  ...item,
-  year: item.date ? item.date.split("-")[0] : null
-}));
+  // ── Static text translations ─────────────────────────────────────────────
+  const tProduction = useTranslate("Production Designer");
+  const tBio = useTranslate("We design cinematic environments and immersive worlds through production design, combining storytelling with visual artistry.");
+  const tExperience = useTranslate("Experience");
+  const tCreating = useTranslate("Creating cinematic worlds through design.");
+  const tWork = useTranslate("Work");
+  const tSetDesign = useTranslate("Set Design");
+  const tCostume = useTranslate("Costume");
+  const tStage = useTranslate("Stage");
+  const tCompany = useTranslate("Company");
+  const tAbout = useTranslate("About");
+  const tContact = useTranslate("Contact");
 
-const groupedTimeline = formattedTimeline
-  .filter(item => item.year)
-  .reduce((acc, item) => {
-    if (!acc[item.year]) acc[item.year] = [];
+  useEffect(() => {
+    client.fetch(`*[_type=="project" && showInTimeline==true && defined(date)] 
+    | order(date desc){
+      _id,
+      title,
+      date,
+      shortDesc,
+      "coverImage": coverImage.asset->url
+    }`).then(setTimeline);
+  }, []);
 
-    if (acc[item.year].length < 3) {
-      acc[item.year].push(item);
-    }
+  // ── Translate timeline content ───────────────────────────────────────────
+  const translatedTimeline = useTranslateArray(timeline, ["title", "shortDesc"]);
 
-    return acc;
-  }, {});
+  const formattedTimeline = translatedTimeline.map(item => ({
+    ...item,
+    year: item.date ? item.date.split("-")[0] : null
+  }));
 
-  const changeLanguage = (lang) => {
-  if (lang === "en") return;
-
-  const url = window.location.origin;
-
-  window.open(
-    `https://translate.google.com/translate?sl=en&tl=de&u=${encodeURIComponent(url)}`,
-    "_blank"
-  );
-};
+  const groupedTimeline = formattedTimeline
+    .filter(item => item.year)
+    .reduce((acc, item) => {
+      if (!acc[item.year]) acc[item.year] = [];
+      if (acc[item.year].length < 3) acc[item.year].push(item);
+      return acc;
+    }, {});
 
   return (
     <div className={`about-page ${darkMode ? "dark" : "light"}`}>
 
-      
-
-      {/* NAVBAR */}
-      <header className="navbar scrolled">
-
-        {menuOpen && (
-  <div className="menu-overlay">
-    <button className="close-btn" onClick={() => setMenuOpen(false)}>
-      ✕
-    </button>
-
-    <div className="menu-links">
-      <button onClick={() => { navigate("/"); setMenuOpen(false); }}>Home</button>
-      <button onClick={() => { navigate("/about"); setMenuOpen(false); }}>About</button>
-      <button onClick={() => { navigate("/set"); setMenuOpen(false); }}>Set</button>
-      <button onClick={() => { navigate("/costume"); setMenuOpen(false); }}>Costume</button>
-      <button onClick={() => { navigate("/stage"); setMenuOpen(false); }}>Stage</button>
-      <button onClick={() => { navigate("/contact"); setMenuOpen(false); }}>Contact</button>
-    </div>
-  </div>
-)}
-        <div className="logo" onClick={() => navigate("/")}>
-          Stephanie Traut
-        </div>
-
-       <nav className="nav-links">
-          <a onClick={() => navigate("/set")}>Set</a>
-          <a onClick={() => navigate("/stage")}>Stage</a>
-          <a onClick={() => navigate("/costume")}>Costume</a>
-          <a onClick={() => navigate("/about")}>About</a>
-          <a onClick={() => navigate("/contact")}>Contact</a>
-        </nav>
-
-        <div className="nav-right">
-          <button
-            className="theme-toggle"
-            onClick={() => setDarkMode(!darkMode)}
-          >
-            <div className={`toggle-track ${darkMode ? "dark" : ""}`}>
-              <div className="toggle-thumb"></div>
-            </div>
-          </button>
-
-          <div className="lang-switch">
-  <button onClick={() => changeLanguage("en")}>EN</button>
-  <button onClick={() => changeLanguage("de")}>DE</button>
-</div>
-
-          <div
-            className={`hamburger ${menuOpen ? "active" : ""}`}
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        </div>
-      </header>
+      <Navbar darkMode={darkMode} setDarkMode={setDarkMode} alwaysScrolled />
 
       {/* HERO */}
       <section className="about-hero-new">
         <div className="about-hero-image">
           <img src="/images/steph.jpeg" alt="Stephanie Traut" />
         </div>
-
         <div className="about-hero-text">
-          <p className="about-label">Production Designer</p>
-          <h1>
-            Stephanie<br />Traut
-          </h1>
-          <p className="about-bio">
-            We design cinematic environments and immersive worlds through
-            production design, combining storytelling with visual artistry.
-          </p>
+          <p className="about-label">{tProduction}</p>
+          <h1>Stephanie<br />Traut</h1>
+          <p className="about-bio">{tBio}</p>
         </div>
       </section>
 
-      {/* DIVIDER */}
       <div className="about-divider" />
 
       {/* TIMELINE */}
-     <section className="about-timeline-new">
-  <div className="timeline-header">
-    <p className="timeline-label">Experience</p>
-  </div>
-
-  <div className="timeline-list">
-    {Object.entries(groupedTimeline)
-  .sort((a, b) => b[0] - a[0]) // 👈 sort years DESC
-  .map(([year, projects]) => (
-      <div className="timeline-entry" key={year}>
-
-        {/* YEAR */}
-        <div className="timeline-entry-year">
-          {year}
+      <section className="about-timeline-new">
+        <div className="timeline-header">
+          <p className="timeline-label">{tExperience}</p>
         </div>
-
-        {/* LINE + DOT */}
-        <div className="timeline-entry-bar">
-          <div className="timeline-dot"></div>
-          <div className="timeline-bar-line"></div>
+        <div className="timeline-list">
+          {Object.entries(groupedTimeline)
+            .sort((a, b) => b[0] - a[0])
+            .map(([year, projects]) => (
+              <div className="timeline-entry" key={year}>
+                <div className="timeline-entry-year">{year}</div>
+                <div className="timeline-entry-bar">
+                  <div className="timeline-dot"></div>
+                  <div className="timeline-bar-line"></div>
+                </div>
+                <div className="timeline-entry-body">
+                  {projects.map((project) => (
+                    <div
+                      key={project._id}
+                      className="timeline-project"
+                      onClick={() => navigate(`/project/${project._id}`)}
+                    >
+                      <h3>{project.title}</h3>
+                      <p>{project.shortDesc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
         </div>
-
-        {/* PROJECTS */}
-        <div className="timeline-entry-body">
-          {projects.map((project) => (
-            <div
-              key={project._id}
-              className="timeline-project"
-              onClick={() => navigate(`/project/${project._id}`)}
-            >
-              <h3>{project.title}</h3>
-              <p>{project.shortDesc}</p> {/* ✅ FIXED */}
-            </div>
-          ))}
-        </div>
-
-      </div>
-    ))}
-  </div>
-</section>
+      </section>
 
       {/* FOOTER */}
       <footer className="footer">
         <div className="footer-left">
           <h3>Stephanie</h3>
-          <p>Creating cinematic worlds through design.</p>
-
-          {/* ✅ FIXED INSTAGRAM LINK */}
+          <p>{tCreating}</p>
           <a
             href="https://www.instagram.com/stephanie.traut.design"
             target="_blank"
@@ -190,19 +116,17 @@ const groupedTimeline = formattedTimeline
             <FaInstagram size={22} />
           </a>
         </div>
-
         <div className="footer-right">
           <div>
-            <h4>Work</h4>
-            <p onClick={() => navigate("/set")}>Set Design</p>
-            <p onClick={() => navigate("/costume")}>Costume</p>
-            <p onClick={() => navigate("/stage")}>Stage</p>
+            <h4>{tWork}</h4>
+            <p onClick={() => navigate("/set")}>{tSetDesign}</p>
+            <p onClick={() => navigate("/costume")}>{tCostume}</p>
+            <p onClick={() => navigate("/stage")}>{tStage}</p>
           </div>
-
           <div>
-            <h4>Company</h4>
-            <p onClick={() => navigate("/about")}>About</p>
-            <p onClick={() => navigate("/contact")}>Contact</p>
+            <h4>{tCompany}</h4>
+            <p onClick={() => navigate("/about")}>{tAbout}</p>
+            <p onClick={() => navigate("/contact")}>{tContact}</p>
           </div>
         </div>
       </footer>
