@@ -37,7 +37,15 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
   const tSend = useTranslate("Send Message");
 
   // ── Translate project content ────────────────────────────────────────────
-  const translatedProject = useTranslateObject(project, ["title", "tagline", "shortDesc", "longDesc"]);
+  const translatedProject = useTranslateObject(project, [
+  "title",
+  "tagline",
+  "shortDesc",
+  "longDesc",
+  "client",
+  "theme",
+  "highlights"
+]);
 
   useEffect(() => {
     client.fetch(
