@@ -4266,3 +4266,8 @@ body.dark .meta-item {
 body.dark .name {
   color: #aaa;
 }
+
+
+.notranslate {
+  translate: no;
+}
