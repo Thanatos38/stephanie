@@ -8,7 +8,7 @@ import CostumePage from "./pages/CostumePage";
 import AboutPage from "./pages/AboutPage";
 import ProjectDetail from "./pages/ProjectDetails";
 import Contact from "./pages/Contact";
-import { LanguageProvider } from "./context/LanguageContext";
+import { LanguageProvider } from "./context/Languagecontext";
 
 export default function App() {
   const [darkMode, setDarkMode] = useState(false);
