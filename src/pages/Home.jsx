@@ -40,6 +40,12 @@ export default function Home({ darkMode, setDarkMode }) {
   const tMessage = useTranslate("Type your message");
   const tSend = useTranslate("Send Message");
 
+  const tSet = useTranslate("Set");
+const tStage = useTranslate("Stage");
+const tCostume = useTranslate("Costume");
+const tAbout = useTranslate("About");
+const tContact = useTranslate("Contact");
+
   // ── Fetch / init layout ─────────────────────────────────────────────────────
   useEffect(() => {
     const initLayout = async () => {
@@ -206,12 +212,12 @@ export default function Home({ darkMode, setDarkMode }) {
         <div className="logo" onClick={() => navigate("/")}>Stephanie Traut</div>
 
         <nav className="nav-links">
-          <a onClick={() => navigate("/set")}>Set</a>
-          <a onClick={() => navigate("/stage")}>Stage</a>
-          <a onClick={() => navigate("/costume")}>Costume</a>
-          <a onClick={() => navigate("/about")}>About</a>
-          <a onClick={() => navigate("/contact")}>Contact</a>
-        </nav>
+  <a onClick={() => navigate("/set")}>{tSet}</a>
+  <a onClick={() => navigate("/stage")}>{tStage}</a>
+  <a onClick={() => navigate("/costume")}>{tCostume}</a>
+  <a onClick={() => navigate("/about")}>{tAbout}</a>
+  <a onClick={() => navigate("/contact")}>{tContact}</a>
+</nav>
 
         <div className="nav-right">
           <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
