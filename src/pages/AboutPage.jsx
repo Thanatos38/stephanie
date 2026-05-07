@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { client } from "../sanity";
 import { FaInstagram } from "react-icons/fa";
 import Navbar from "../components/Navbar";
-import { useTranslate, useTranslateArray } from "../hooks/useTranslation";
+import { useTranslate, useTranslateArray } from "../hooks/Usetranslation";
 
 export default function AboutPage({ darkMode, setDarkMode }) {
   const navigate = useNavigate();
