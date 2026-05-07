@@ -1,7 +1,7 @@
 // src/components/Navbar.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useLang } from "../context/LanguageContext";
+import { useLang } from "../context/Languagecontext";
 
 export default function Navbar({ darkMode, setDarkMode, scrolled = false, alwaysScrolled = false }) {
   const navigate = useNavigate();

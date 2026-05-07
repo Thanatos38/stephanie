@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { client } from "../sanity";
 import { FaInstagram } from "react-icons/fa";
-import { useLang } from "../context/LanguageContext";
-import { useTranslate, useTranslateArray } from "../hooks/useTranslation";
+import { useLang } from "../context/Languagecontext";
+import { useTranslate, useTranslateArray } from "../hooks/Usetranslation";
 
 export default function CategoryPage({ category, title, subtitle, darkMode, setDarkMode }) {
   const [projects, setProjects] = useState([]);

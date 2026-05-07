@@ -5,8 +5,8 @@ import { client } from "../sanity";
 import emailjs from "emailjs-com";
 import { Rnd } from "react-rnd";
 import { FaInstagram } from "react-icons/fa";
-import { useLang } from "../context/LanguageContext";
-import { useTranslate } from "../hooks/useTranslation";
+import { useLang } from "../context/Languagecontext";
+import { useTranslate } from "../hooks/Usetranslation";
 
 const EDIT_KEY = import.meta.env.VITE_EDIT_KEY || "stephanie2024";
 
