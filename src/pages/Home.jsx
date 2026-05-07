@@ -361,32 +361,77 @@ export default function Home({ darkMode, setDarkMode }) {
                 }
                 style={{ zIndex: el.zIndex || 1 }}
               >
-                <div style={{ position: "relative", width: "100%", height: "100%" }}>
-                  <img
-                    src={el.src}
-                    alt=""
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      display: "block",
-                      cursor: !isEditMode && el.projectId ? "pointer" : "default",
-                    }}
-                    draggable={false}
-                    onClick={() => {
-                      if (!isEditMode && el.projectId) navigate(`/project/${el.projectId}`);
-                    }}
-                  />
-                  {isEditMode && (
-                    <button
-                      onClick={() => removeElement(i)}
-                      style={removeBtn}
-                      title="Remove image"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
+                <div
+  style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}
+  onMouseEnter={e => {
+    if (isEditMode) return;
+    e.currentTarget.querySelector('img').style.transform = 'scale(1.05)';
+    e.currentTarget.querySelector('.hover-overlay').style.opacity = '1';
+  }}
+  onMouseLeave={e => {
+    if (isEditMode) return;
+    e.currentTarget.querySelector('img').style.transform = 'scale(1)';
+    e.currentTarget.querySelector('.hover-overlay').style.opacity = '0';
+  }}
+>
+  <img
+    src={el.src}
+    alt=""
+    style={{
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+      display: "block",
+      cursor: !isEditMode && el.projectId ? "pointer" : "default",
+      transition: "transform 0.4s ease",
+    }}
+    draggable={false}
+    onClick={() => {
+      if (!isEditMode && el.projectId) navigate(`/project/${el.projectId}`);
+    }}
+  />
+  {!isEditMode && (
+    <div
+      className="hover-overlay"
+      style={{
+        position: "absolute",
+        inset: 0,
+        background: "rgba(0,0,0,0.45)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        opacity: 0,
+        transition: "opacity 0.3s ease",
+        cursor: el.projectId ? "pointer" : "default",
+      }}
+      onClick={() => {
+        if (el.projectId) navigate(`/project/${el.projectId}`);
+      }}
+    >
+      <span style={{
+        color: "#fff",
+        fontFamily: "Cormorant Garamond, serif",
+        fontSize: "1.25rem",
+        fontWeight: 300,
+        letterSpacing: "0.12em",
+        textAlign: "center",
+        padding: "0 1rem",
+        textTransform: "uppercase",
+      }}>
+        {projects.find(p => p._id === el.projectId)?.title || ""}
+      </span>
+    </div>
+  )}
+  {isEditMode && (
+    <button
+      onClick={() => removeElement(i)}
+      style={removeBtn}
+      title="Remove image"
+    >
+      ✕
+    </button>
+  )}
+</div>
               </Rnd>
             ))}
 
