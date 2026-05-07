@@ -26,52 +26,46 @@ export default function Home({ darkMode, setDarkMode }) {
   const [showPicker, setShowPicker] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [canvasHeight, setCanvasHeight] = useState(2000);
   const navigate = useNavigate();
   const form = useRef();
   const isEditMode = useEditMode();
   const { lang, switchLanguage, translating } = useLang();
 
-// Static text translations
-const tGetInTouch = useTranslate("Get in Touch");
-const tReach = useTranslate("We'd love to hear from you! Reach out today.");
-const tName = useTranslate("Enter your name");
-const tEmail = useTranslate("Enter your email");
-const tMessage = useTranslate("Type your message");
-const tSend = useTranslate("Send Message");
-  const [canvasHeight, setCanvasHeight] = useState(2000);
+  // ── Translations ────────────────────────────────────────────────────────────
+  const tGetInTouch = useTranslate("Get in Touch");
+  const tReach = useTranslate("We'd love to hear from you! Reach out today.");
+  const tName = useTranslate("Enter your name");
+  const tEmail = useTranslate("Enter your email");
+  const tMessage = useTranslate("Type your message");
+  const tSend = useTranslate("Send Message");
 
   // ── Fetch / init layout ─────────────────────────────────────────────────────
   useEffect(() => {
-  const initLayout = async () => {
-    try {
-      const existing = await client.fetch(`*[_id == "homepageLayout"][0]`);
-
-      if (!existing) {
-        await client.createIfNotExists({
-          _id: "homepageLayout",
-          _type: "layout",
-          elements: [],
-          canvasHeight: 2000,
-        });
+    const initLayout = async () => {
+      try {
+        const existing = await client.fetch(`*[_id == "homepageLayout"][0]`);
+        if (!existing) {
+          await client.createIfNotExists({
+            _id: "homepageLayout",
+            _type: "layout",
+            elements: [],
+            canvasHeight: 2000,
+          });
+        }
+        const data = await client.fetch(`*[_type == "layout" && _id == "homepageLayout"][0]`);
+        if (data) {
+          setCustomLayout(data.elements || []);
+          setCanvasHeight(data.canvasHeight || 2000);
+        }
+      } catch (err) {
+        console.error("Layout init error:", err);
       }
+    };
+    initLayout();
+  }, []);
 
-      const data = await client.fetch(
-        `*[_type == "layout" && _id == "homepageLayout"][0]`
-      );
-
-      if (data) {
-        setCustomLayout(data.elements || []);
-        setCanvasHeight(data.canvasHeight || 2000);
-      }
-    } catch (err) {
-      console.error("Layout init error:", err);
-    }
-  };
-
-  initLayout();
-}, []);
-
-  // ── Fetch all project images for the picker (with project ID) ──────────────
+  // ── Fetch all project images for the picker ─────────────────────────────────
   useEffect(() => {
     client
       .fetch(`*[_type == "project"]{
@@ -87,7 +81,6 @@ const tSend = useTranslate("Send Message");
           if (p.images) p.images.forEach(url => imgs.push({ src: url, projectId: p._id }));
           if (p.homepageImages) p.homepageImages.forEach(url => imgs.push({ src: url, projectId: p._id }));
         });
-        // Deduplicate by src
         const seen = new Set();
         setAllImages(imgs.filter(img => {
           if (!img.src || seen.has(img.src)) return false;
@@ -165,12 +158,8 @@ const tSend = useTranslate("Send Message");
   const addImageToCanvas = ({ src, projectId }) => {
     const newElement = {
       _key: Date.now().toString(),
-      x: 80,
-      y: 80,
-      width: 300,
-      height: 300,
-      src,
-      projectId,
+      x: 80, y: 80, width: 300, height: 300,
+      src, projectId,
       zIndex: (customLayout?.length || 0) + 1,
     };
     setCustomLayout((prev) => [...(prev || []), newElement]);
@@ -186,10 +175,7 @@ const tSend = useTranslate("Send Message");
   const saveLayout = async () => {
     setSaving(true);
     try {
-      await client
-        .patch("homepageLayout")
-        .set({ elements: customLayout, canvasHeight  })
-        .commit();
+      await client.patch("homepageLayout").set({ elements: customLayout, canvasHeight }).commit();
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
@@ -198,18 +184,6 @@ const tSend = useTranslate("Send Message");
       setSaving(false);
     }
   };
-
-  // ── Language ────────────────────────────────────────────────────────────────
-  <div className="lang-switch">
-  <button
-    onClick={() => switchLanguage("EN")}
-    style={{ fontWeight: lang === "EN" ? 700 : 400, opacity: translating ? 0.5 : 1 }}
-  >EN</button>
-  <button
-    onClick={() => switchLanguage("DE")}
-    style={{ fontWeight: lang === "DE" ? 700 : 400, opacity: translating ? 0.5 : 1 }}
-  >{translating ? "…" : "DE"}</button>
-</div>
 
   // ── Email ───────────────────────────────────────────────────────────────────
   const sendEmail = (e) => {
@@ -247,8 +221,14 @@ const tSend = useTranslate("Send Message");
           </button>
 
           <div className="lang-switch">
-            <button onClick={() => changeLanguage("en")}>EN</button>
-            <button onClick={() => changeLanguage("de")}>DE</button>
+            <button
+              onClick={() => switchLanguage("EN")}
+              style={{ fontWeight: lang === "EN" ? 700 : 400, opacity: translating ? 0.5 : 1 }}
+            >EN</button>
+            <button
+              onClick={() => switchLanguage("DE")}
+              style={{ fontWeight: lang === "DE" ? 700 : 400, opacity: translating ? 0.5 : 1 }}
+            >{translating ? "…" : "DE"}</button>
           </div>
 
           <div
@@ -282,51 +262,30 @@ const tSend = useTranslate("Send Message");
 
       {/* ── EDIT MODE TOOLBAR ── */}
       {isEditMode && (
-  <div style={toolbarStyle}>
-    <span style={{ fontWeight: 600, color: "#d4c5a9", letterSpacing: "0.08em" }}>
-      ✦ Edit Mode
-    </span>
-    <span style={{ opacity: 0.55, fontSize: "0.7rem" }}>
-      Drag to move · Corner to resize · Click ✕ to remove
-    </span>
-    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-      <span style={{ color: "#d4c5a9", fontSize: "0.7rem" }}>Height:</span>
-      <button
-        style={btnStyle("#3a3a3a", "#d4c5a9")}
-        onClick={() => setCanvasHeight(h => Math.max(500, h - 500))}
-      >− Shorter</button>
-      <span style={{ color: "#fff", fontSize: "0.7rem" }}>{canvasHeight}px</span>
-      <button
-        style={btnStyle("#3a3a3a", "#d4c5a9")}
-        onClick={() => setCanvasHeight(h => h + 500)}
-      >+ Taller</button>
-    </div>
-    <div style={{ display: "flex", gap: "0.75rem", marginLeft: "auto" }}>
-      <button
-        style={btnStyle("#3a3a3a", "#d4c5a9")}
-        onClick={() => setShowPicker(true)}
-      >
-        + Add Image
-      </button>
-      <button
-        style={btnStyle(saved ? "#4a7c4a" : "#d4c5a9", saved ? "#fff" : "#111")}
-        onClick={saveLayout}
-        disabled={saving}
-      >
-        {saving ? "Saving…" : saved ? "✓ Saved" : "Save Layout"}
-      </button>
-    </div>
-  </div>
-)}
+        <div style={toolbarStyle}>
+          <span style={{ fontWeight: 600, color: "#d4c5a9", letterSpacing: "0.08em" }}>✦ Edit Mode</span>
+          <span style={{ opacity: 0.55, fontSize: "0.7rem" }}>Drag to move · Corner to resize · Click ✕ to remove</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <span style={{ color: "#d4c5a9", fontSize: "0.7rem" }}>Height:</span>
+            <button style={btnStyle("#3a3a3a", "#d4c5a9")} onClick={() => setCanvasHeight(h => Math.max(500, h - 500))}>− Shorter</button>
+            <span style={{ color: "#fff", fontSize: "0.7rem" }}>{canvasHeight}px</span>
+            <button style={btnStyle("#3a3a3a", "#d4c5a9")} onClick={() => setCanvasHeight(h => h + 500)}>+ Taller</button>
+          </div>
+          <div style={{ display: "flex", gap: "0.75rem", marginLeft: "auto" }}>
+            <button style={btnStyle("#3a3a3a", "#d4c5a9")} onClick={() => setShowPicker(true)}>+ Add Image</button>
+            <button style={btnStyle(saved ? "#4a7c4a" : "#d4c5a9", saved ? "#fff" : "#111")} onClick={saveLayout} disabled={saving}>
+              {saving ? "Saving…" : saved ? "✓ Saved" : "Save Layout"}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── IMAGE PICKER MODAL ── */}
       {isEditMode && showPicker && (
         <div style={overlayStyle} onClick={() => setShowPicker(false)}>
           <div style={pickerStyle} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-              <h3 style={{ margin: 0, fontFamily: "Cormorant Garamond, serif", fontWeight: 400, fontSize: "1.4rem" }}>
-                Pick an Image
-              </h3>
+              <h3 style={{ margin: 0, fontFamily: "Cormorant Garamond, serif", fontWeight: 400, fontSize: "1.4rem" }}>Pick an Image</h3>
               <button style={btnStyle("#eee", "#333")} onClick={() => setShowPicker(false)}>✕ Close</button>
             </div>
             <p style={{ fontSize: "0.75rem", color: "#888", marginBottom: "1rem", fontFamily: "monospace" }}>
@@ -335,10 +294,7 @@ const tSend = useTranslate("Send Message");
             <div style={pickerGridStyle}>
               {allImages.map((img, i) => (
                 <img
-                  key={i}
-                  src={img.src}
-                  alt=""
-                  style={pickerImgStyle}
+                  key={i} src={img.src} alt="" style={pickerImgStyle}
                   onClick={() => addImageToCanvas(img)}
                   onMouseEnter={(e) => { e.target.style.opacity = "0.75"; e.target.style.transform = "scale(0.97)"; }}
                   onMouseLeave={(e) => { e.target.style.opacity = "1"; e.target.style.transform = "scale(1)"; }}
@@ -361,90 +317,59 @@ const tSend = useTranslate("Send Message");
                 bounds="parent"
                 disableDragging={!isEditMode}
                 enableResizing={isEditMode}
-                onDragStop={(e, d) =>
-                  handleUpdate(i, { ...el, x: d.x, y: d.y })
-                }
+                onDragStop={(e, d) => handleUpdate(i, { ...el, x: d.x, y: d.y })}
                 onResizeStop={(e, direction, ref, delta, position) =>
-                  handleUpdate(i, {
-                    ...el,
-                    width: ref.offsetWidth,
-                    height: ref.offsetHeight,
-                    ...position,
-                  })
+                  handleUpdate(i, { ...el, width: ref.offsetWidth, height: ref.offsetHeight, ...position })
                 }
                 style={{ zIndex: el.zIndex || 1 }}
               >
                 <div
-  style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}
-  onMouseEnter={e => {
-    if (isEditMode) return;
-    e.currentTarget.querySelector('img').style.transform = 'scale(1.05)';
-    e.currentTarget.querySelector('.hover-overlay').style.opacity = '1';
-  }}
-  onMouseLeave={e => {
-    if (isEditMode) return;
-    e.currentTarget.querySelector('img').style.transform = 'scale(1)';
-    e.currentTarget.querySelector('.hover-overlay').style.opacity = '0';
-  }}
->
-  <img
-    src={el.src}
-    alt=""
-    style={{
-      width: "100%",
-      height: "100%",
-      objectFit: "cover",
-      display: "block",
-      cursor: !isEditMode && el.projectId ? "pointer" : "default",
-      transition: "transform 0.4s ease",
-    }}
-    draggable={false}
-    onClick={() => {
-      if (!isEditMode && el.projectId) navigate(`/project/${el.projectId}`);
-    }}
-  />
-  {!isEditMode && (
-    <div
-      className="hover-overlay"
-      style={{
-        position: "absolute",
-        inset: 0,
-        background: "rgba(0,0,0,0.45)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        opacity: 0,
-        transition: "opacity 0.3s ease",
-        cursor: el.projectId ? "pointer" : "default",
-      }}
-      onClick={() => {
-        if (el.projectId) navigate(`/project/${el.projectId}`);
-      }}
-    >
-      <span style={{
-        color: "#fff",
-        fontFamily: "Cormorant Garamond, serif",
-        fontSize: "1.25rem",
-        fontWeight: 300,
-        letterSpacing: "0.12em",
-        textAlign: "center",
-        padding: "0 1rem",
-        textTransform: "uppercase",
-      }}>
-        {projects.find(p => p._id === el.projectId)?.title || ""}
-      </span>
-    </div>
-  )}
-  {isEditMode && (
-    <button
-      onClick={() => removeElement(i)}
-      style={removeBtn}
-      title="Remove image"
-    >
-      ✕
-    </button>
-  )}
-</div>
+                  style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}
+                  onMouseEnter={e => {
+                    if (isEditMode) return;
+                    e.currentTarget.querySelector('img').style.transform = 'scale(1.05)';
+                    e.currentTarget.querySelector('.hover-overlay').style.opacity = '1';
+                  }}
+                  onMouseLeave={e => {
+                    if (isEditMode) return;
+                    e.currentTarget.querySelector('img').style.transform = 'scale(1)';
+                    e.currentTarget.querySelector('.hover-overlay').style.opacity = '0';
+                  }}
+                >
+                  <img
+                    src={el.src} alt=""
+                    style={{
+                      width: "100%", height: "100%", objectFit: "cover", display: "block",
+                      cursor: !isEditMode && el.projectId ? "pointer" : "default",
+                      transition: "transform 0.4s ease",
+                    }}
+                    draggable={false}
+                    onClick={() => { if (!isEditMode && el.projectId) navigate(`/project/${el.projectId}`); }}
+                  />
+                  {!isEditMode && (
+                    <div
+                      className="hover-overlay"
+                      style={{
+                        position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        opacity: 0, transition: "opacity 0.3s ease",
+                        cursor: el.projectId ? "pointer" : "default",
+                      }}
+                      onClick={() => { if (el.projectId) navigate(`/project/${el.projectId}`); }}
+                    >
+                      <span style={{
+                        color: "#fff", fontFamily: "Cormorant Garamond, serif",
+                        fontSize: "1.25rem", fontWeight: 300, letterSpacing: "0.12em",
+                        textAlign: "center", padding: "0 1rem", textTransform: "uppercase",
+                      }}>
+                        {projects.find(p => p._id === el.projectId)?.title || ""}
+                      </span>
+                    </div>
+                  )}
+                  {isEditMode && (
+                    <button onClick={() => removeElement(i)} style={removeBtn} title="Remove image">✕</button>
+                  )}
+                </div>
               </Rnd>
             ))}
 
@@ -455,7 +380,6 @@ const tSend = useTranslate("Send Message");
             )}
           </div>
         ) : (
-          /* Fallback while loading */
           <div className="home-projects">
             {projects.map((project, index) => (
               <div
@@ -480,17 +404,17 @@ const tSend = useTranslate("Send Message");
       {/* ── CONTACT ── */}
       <section className="contact">
         <div className="contact-inner">
-          <h1>Get in Touch</h1>
-          <p>We'd love to hear from you! Reach out today.</p>
+          <h1>{tGetInTouch}</h1>
+          <p>{tReach}</p>
 
           <form ref={form} onSubmit={sendEmail} className="contact-form">
-            <label>Name</label>
-            <input type="text" name="name" placeholder="Enter your name" required />
-            <label>Email</label>
-            <input type="email" name="email" placeholder="Enter your email" required />
-            <label>Message</label>
-            <textarea name="message" placeholder="Type your message" required></textarea>
-            <button type="submit">Send Message</button>
+            <label>{tName}</label>
+            <input type="text" name="name" placeholder={tName} required />
+            <label>{tEmail}</label>
+            <input type="email" name="email" placeholder={tEmail} required />
+            <label>{tMessage}</label>
+            <textarea name="message" placeholder={tMessage} required></textarea>
+            <button type="submit">{tSend}</button>
           </form>
 
           <a
@@ -511,96 +435,46 @@ const tSend = useTranslate("Send Message");
 // ── Inline styles ─────────────────────────────────────────────────────────────
 
 const toolbarStyle = {
-  position: "sticky",
-  top: 0,
-  zIndex: 9999,
-  display: "flex",
-  alignItems: "center",
-  gap: "1.25rem",
-  padding: "0.7rem 1.5rem",
-  background: "#111",
-  color: "#f0ece4",
-  fontFamily: "'DM Mono', 'Courier New', monospace",
-  fontSize: "0.75rem",
-  letterSpacing: "0.06em",
-  boxShadow: "0 2px 12px rgba(0,0,0,0.3)",
+  position: "sticky", top: 0, zIndex: 9999, display: "flex", alignItems: "center",
+  gap: "1.25rem", padding: "0.7rem 1.5rem", background: "#111", color: "#f0ece4",
+  fontFamily: "'DM Mono', 'Courier New', monospace", fontSize: "0.75rem",
+  letterSpacing: "0.06em", boxShadow: "0 2px 12px rgba(0,0,0,0.3)",
 };
 
 const btnStyle = (bg, color) => ({
-  padding: "0.35rem 1rem",
-  background: bg,
-  color,
-  border: "none",
-  borderRadius: "2px",
-  fontFamily: "inherit",
-  fontSize: "0.75rem",
-  letterSpacing: "0.06em",
-  cursor: "pointer",
-  transition: "opacity 0.2s",
-  whiteSpace: "nowrap",
+  padding: "0.35rem 1rem", background: bg, color, border: "none", borderRadius: "2px",
+  fontFamily: "inherit", fontSize: "0.75rem", letterSpacing: "0.06em",
+  cursor: "pointer", transition: "opacity 0.2s", whiteSpace: "nowrap",
 });
 
 const overlayStyle = {
-  position: "fixed",
-  inset: 0,
-  background: "rgba(0,0,0,0.6)",
-  zIndex: 99999,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
+  position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 99999,
+  display: "flex", alignItems: "center", justifyContent: "center",
 };
 
 const pickerStyle = {
-  background: "#fff",
-  borderRadius: "4px",
-  padding: "1.5rem",
-  width: "min(90vw, 720px)",
-  maxHeight: "80vh",
-  overflowY: "auto",
+  background: "#fff", borderRadius: "4px", padding: "1.5rem",
+  width: "min(90vw, 720px)", maxHeight: "80vh", overflowY: "auto",
 };
 
 const pickerGridStyle = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
-  gap: "0.5rem",
+  display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "0.5rem",
 };
 
 const pickerImgStyle = {
-  width: "100%",
-  aspectRatio: "1",
-  objectFit: "cover",
-  cursor: "pointer",
-  borderRadius: "3px",
-  transition: "opacity 0.2s, transform 0.15s",
+  width: "100%", aspectRatio: "1", objectFit: "cover", cursor: "pointer",
+  borderRadius: "3px", transition: "opacity 0.2s, transform 0.15s",
 };
 
 const removeBtn = {
-  position: "absolute",
-  top: "-10px",
-  right: "-10px",
-  width: "22px",
-  height: "22px",
-  borderRadius: "50%",
-  border: "none",
-  background: "#c0392b",
-  color: "#fff",
-  fontSize: "0.6rem",
-  cursor: "pointer",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  zIndex: 10,
+  position: "absolute", top: "-10px", right: "-10px", width: "22px", height: "22px",
+  borderRadius: "50%", border: "none", background: "#c0392b", color: "#fff",
+  fontSize: "0.6rem", cursor: "pointer", display: "flex", alignItems: "center",
+  justifyContent: "center", zIndex: 10,
 };
 
 const emptyHint = {
-  position: "absolute",
-  inset: 0,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  color: "#aaa",
-  fontFamily: "'DM Mono', monospace",
-  fontSize: "0.85rem",
-  pointerEvents: "none",
-  textAlign: "center",
+  position: "absolute", inset: 0, display: "flex", alignItems: "center",
+  justifyContent: "center", color: "#aaa", fontFamily: "'DM Mono', monospace",
+  fontSize: "0.85rem", pointerEvents: "none", textAlign: "center",
 };
