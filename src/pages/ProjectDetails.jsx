@@ -39,6 +39,7 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
   // ── Translate project content ────────────────────────────────────────────
   const translatedProject = useTranslateObject(project, [
   "title",
+  "heroTitle",
   "tagline",
   "shortDesc",
   "longDesc",
@@ -49,16 +50,17 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
 
   useEffect(() => {
     client.fetch(
-      `*[_type=="project" && _id==$id][0]{
-        _id, title, tagline, shortDesc, longDesc,
-        "team": team[]{name, role, link},
-        client, date, theme, highlights,
-        "coverImage": coverImage.asset->url,
-        "gallery": gallery | order(orderRank){ layout, "url": image.asset->url },
-        "images": images[].asset->url
-      }`,
-      { id }
-    ).then(setProject);
+  `*[_type=="project" && _id==$id][0]{
+    _id, title, tagline, shortDesc, longDesc,
+    category,
+    "team": team[]{name, role, link},
+    client, date, theme, highlights,
+    "coverImage": coverImage.asset->url,
+    "gallery": gallery | order(orderRank){ layout, "url": image.asset->url },
+    "images": images[].asset->url
+  }`,
+  { id }
+).then(setProject);
   }, [id]);
 
   useEffect(() => {
@@ -244,28 +246,81 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
         </section>
       )}
 
-      {/* PROJECT INFO */}
-      <section className="project-intro">
-        <div className="intro-left">
-          <h1>{translatedProject?.title}</h1>
-          <p className="tagline">{translatedProject?.tagline}</p>
-          <div className="project-meta">
-            {project.client && <p className="meta-item">{project.client}</p>}
-            {project.date && (
-              <p className="meta-item">
-                {new Date(project.date).toLocaleDateString("en-US", { year: "numeric", month: "long" })}
-              </p>
-            )}
-            {project.team?.map((member, index) => (
-              <p key={index} className="meta-item">
-                <span className="role"><strong>{member.role}</strong></span><br />
-                <span className="name">{member.name}</span>
-              </p>
-            ))}
-          </div>
-          <p className="project-desc">{translatedProject?.shortDesc}</p>
-        </div>
-      </section>
+{/* PROJECT INFO */}
+<section className="project-intro">
+  <div className="project-heading">
+  <h1 style={{ whiteSpace: "pre-line" }}>
+    {translatedProject?.heroTitle || translatedProject?.title}
+  </h1>
+
+  {translatedProject?.tagline && (
+    <p className="tagline">
+      {translatedProject?.tagline}
+    </p>
+  )}
+</div>
+
+  <div className="project-info-table">
+    {project.category && (
+      <div className="info-row">
+        <span className="info-label">Category</span>
+        <span className="info-value">
+          {(Array.isArray(project.category)
+            ? project.category
+            : [project.category]
+          )
+            .map(
+              (cat) =>
+                cat.charAt(0).toUpperCase() + cat.slice(1)
+            )
+            .join(" · ")}
+        </span>
+      </div>
+    )}
+
+    {project.client && (
+      <div className="info-row">
+        <span className="info-label">Client</span>
+        <span className="info-value">{project.client}</span>
+      </div>
+    )}
+
+    {project.date && (
+      <div className="info-row">
+        <span className="info-label">Year</span>
+        <span className="info-value">
+          {new Date(project.date).toLocaleDateString(
+            "en-US",
+            {
+              year: "numeric",
+              month: "long",
+            }
+          )}
+        </span>
+      </div>
+    )}
+
+    {project.team?.map((member, index) => (
+      <div className="info-row" key={index}>
+        <span className="info-label">
+          {member.role}
+        </span>
+        <span className="info-value">
+          {member.name}
+        </span>
+      </div>
+    ))}
+
+    {translatedProject?.shortDesc && (
+      <div className="info-row info-row--desc">
+        <span className="info-label">About</span>
+        <span className="info-value">
+          {translatedProject?.shortDesc}
+        </span>
+      </div>
+    )}
+  </div>
+</section>
 
       {/* LONG DESCRIPTION */}
       <section className="project-longdesc">

@@ -40,7 +40,7 @@ export default function CategoryPage({
   useEffect(() => {
     client
       .fetch(
-        `*[_type=="project" && category==$category]{
+        `*[_type=="project" && $category in category]{
           _id,
           title,
           tagline,

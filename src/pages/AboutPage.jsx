@@ -25,13 +25,14 @@ export default function AboutPage({ darkMode, setDarkMode }) {
 
   useEffect(() => {
     client.fetch(`*[_type=="project" && showInTimeline==true && defined(date)] 
-    | order(date desc){
-      _id,
-      title,
-      date,
-      shortDesc,
-      "coverImage": coverImage.asset->url
-    }`).then(setTimeline);
+  | order(date desc){
+    _id,
+    title,
+    date,
+    category,
+    shortDesc,
+    "coverImage": coverImage.asset->url
+  }`).then(setTimeline);
   }, []);
 
   // ── Translate timeline content ───────────────────────────────────────────
@@ -62,7 +63,7 @@ export default function AboutPage({ darkMode, setDarkMode }) {
         </div>
         <div className="about-hero-text">
           <p className="about-label">{tProduction}</p>
-          <h1>Stephanie<br />Traut</h1>
+          <h1>Stephanie Traut</h1>
           <p className="about-bio">{tBio}</p>
         </div>
       </section>
@@ -70,36 +71,54 @@ export default function AboutPage({ darkMode, setDarkMode }) {
       <div className="about-divider" />
 
       {/* TIMELINE */}
-      <section className="about-timeline-new">
-        <div className="timeline-header">
-          <p className="timeline-label">{tExperience}</p>
-        </div>
-        <div className="timeline-list">
-          {Object.entries(groupedTimeline)
-            .sort((a, b) => b[0] - a[0])
-            .map(([year, projects]) => (
-              <div className="timeline-entry" key={year}>
-                <div className="timeline-entry-year">{year}</div>
-                <div className="timeline-entry-bar">
-                  <div className="timeline-dot"></div>
-                  <div className="timeline-bar-line"></div>
-                </div>
-                <div className="timeline-entry-body">
-                  {projects.map((project) => (
-                    <div
-                      key={project._id}
-                      className="timeline-project"
-                      onClick={() => navigate(`/project/${project._id}`)}
-                    >
-                      <h3>{project.title}</h3>
-                      <p>{project.shortDesc}</p>
-                    </div>
-                  ))}
+      {/* TIMELINE */}
+<section className="about-timeline-new">
+  <div className="timeline-header">
+    <p className="timeline-label">{tExperience}</p>
+  </div>
+  <div className="timeline-list">
+    {Object.entries(groupedTimeline)
+      .sort((a, b) => b[0] - a[0])
+      .map(([year, projects]) => (
+        <div className="timeline-entry" key={year}>
+          <div className="timeline-entry-year">{year}</div>
+          <div className="timeline-entry-projects">
+            {projects.map((project) => (
+              <div
+                key={project._id}
+                className="timeline-card"
+                onClick={() => navigate(`/project/${project._id}`)}
+              >
+                {project.coverImage && (
+                  <div className="timeline-card-image">
+                    <img src={project.coverImage} alt={project.title} />
+                  </div>
+                )}
+                <div className="timeline-card-info">
+                  <div className="timeline-card-meta">
+                    {project.category && (
+                      <span className="timeline-card-category">
+                        {(Array.isArray(project.category)
+                          ? project.category
+                          : [project.category]
+                        ).map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(" · ")}
+                      </span>
+                    )}
+                    <span className="timeline-card-year">{year}</span>
+                  </div>
+                  <h3 className="timeline-card-title">{project.title}</h3>
+                  {project.shortDesc && (
+                    <p className="timeline-card-desc">{project.shortDesc}</p>
+                  )}
+                  <span className="timeline-card-link">View project →</span>
                 </div>
               </div>
             ))}
+          </div>
         </div>
-      </section>
+      ))}
+  </div>
+</section>
 
       {/* FOOTER */}
       <footer className="footer">
