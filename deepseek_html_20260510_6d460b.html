@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Interactive Globe - Spin to Location</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #ffffff;
+        }
+
+        /* Light mode (default) */
+        :root {
+            --panel-bg: rgba(255, 255, 255, 0.92);
+            --panel-border: rgba(0, 0, 0, 0.08);
+            --text-color: #1a1a1a;
+            --text-secondary: #666;
+            --btn-bg: #ffffff;
+            --btn-border: #e0e0e0;
+            --btn-hover: #f5f5f5;
+            --btn-active: #e8e8e8;
+            --accent: #2563eb;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.08), 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Dark mode support - respects system preference */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --panel-bg: rgba(28, 28, 30, 0.92);
+                --panel-border: rgba(255, 255, 255, 0.08);
+                --text-color: #e5e5e5;
+                --text-secondary: #9ca3af;
+                --btn-bg: #2c2c2e;
+                --btn-border: #3a3a3c;
+                --btn-hover: #3a3a3c;
+                --btn-active: #444446;
+                --accent: #60a5fa;
+                --shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.3);
+            }
+            body {
+                background: #000000;
+            }
+        }
+
+        /* Location Panel - minimal & elegant */
+        .location-panel {
+            position: absolute;
+            bottom: 24px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 12px 20px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 48px;
+            width: fit-content;
+            margin: 0 auto;
+            z-index: 10;
+            border: 1px solid var(--panel-border);
+            box-shadow: var(--shadow);
+            pointer-events: auto;
+        }
+
+        .loc-btn {
+            background: var(--btn-bg);
+            border: 1px solid var(--btn-border);
+            color: var(--text-color);
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            letter-spacing: -0.01em;
+            box-shadow: none;
+        }
+
+        .loc-btn:hover {
+            background: var(--btn-hover);
+            border-color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .loc-btn:active {
+            transform: translateY(1px);
+        }
+
+        .title {
+            position: absolute;
+            top: 20px;
+            left: 24px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            padding: 8px 20px;
+            border-radius: 32px;
+            color: var(--text-color);
+            font-size: 0.875rem;
+            font-weight: 500;
+            z-index: 10;
+            pointer-events: none;
+            border: 1px solid var(--panel-border);
+            letter-spacing: -0.2px;
+        }
+
+        .instruction {
+            position: absolute;
+            bottom: 100px;
+            right: 20px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            padding: 6px 14px;
+            border-radius: 24px;
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            pointer-events: none;
+            border: 1px solid var(--panel-border);
+            font-weight: 400;
+        }
+
+        @media (max-width: 700px) {
+            .loc-btn { padding: 6px 14px; font-size: 0.75rem; }
+            .location-panel { gap: 8px; bottom: 16px; padding: 10px 16px; border-radius: 32px; }
+            .title { font-size: 0.75rem; top: 16px; left: 16px; padding: 6px 16px; }
+            .instruction { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="title">
+        ✦ Interactive Globe
+    </div>
+    <div class="location-panel">
+        <button class="loc-btn" data-lat="40.7128" data-lng="-74.0060" data-name="New York">New York</button>
+        <button class="loc-btn" data-lat="51.5074" data-lng="-0.1278" data-name="London">London</button>
+        <button class="loc-btn" data-lat="35.6895" data-lng="139.6917" data-name="Tokyo">Tokyo</button>
+        <button class="loc-btn" data-lat="-33.8688" data-lng="151.2093" data-name="Sydney">Sydney</button>
+        <button class="loc-btn" data-lat="48.8566" data-lng="2.3522" data-name="Paris">Paris</button>
+        <button class="loc-btn" data-lat="55.7558" data-lng="37.6173" data-name="Moscow">Moscow</button>
+        <button class="loc-btn" data-lat="-23.5505" data-lng="-46.6333" data-name="São Paulo">São Paulo</button>
+        <button class="loc-btn" data-lat="28.6139" data-lng="77.2090" data-name="Delhi">Delhi</button>
+    </div>
+    <div class="instruction">
+        Click any city → globe spins to focus
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+        // --- Setup ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xffffff);
+        scene.fog = null;
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 3.6);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setClearColor(0xffffff, 0);
+        document.body.appendChild(renderer.domElement);
+        
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        document.body.appendChild(labelRenderer.domElement);
+        
+        // Controls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.autoRotate = false;
+        controls.enableZoom = true;
+        controls.enablePan = false;
+        controls.zoomSpeed = 1.0;
+        controls.rotateSpeed = 0.8;
+        controls.target.set(0, 0, 0);
+        
+        // --- Subtle stars background (barely visible, light theme friendly) ---
+        const starGeometry = new THREE.BufferGeometry();
+        const starCount = 1200;
+        const starPositions = new Float32Array(starCount * 3);
+        for (let i = 0; i < starCount; i++) {
+            starPositions[i*3] = (Math.random() - 0.5) * 400;
+            starPositions[i*3+1] = (Math.random() - 0.5) * 400;
+            starPositions[i*3+2] = (Math.random() - 0.5) * 100 - 50;
+        }
+        starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+        const starMaterial = new THREE.PointsMaterial({ color: 0xcbd5e1, size: 0.2, transparent: true, opacity: 0.4 });
+        const stars = new THREE.Points(starGeometry, starMaterial);
+        scene.add(stars);
+        
+        // --- Earth Texture (high quality) ---
+        const earthGeometry = new THREE.SphereGeometry(1.0, 128, 128);
+        const textureLoader = new THREE.TextureLoader();
+        const earthMap = textureLoader.load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
+        const earthSpecularMap = textureLoader.load('https://threejs.org/examples/textures/planets/earth_specular_2048.jpg');
+        const earthNormalMap = textureLoader.load('https://threejs.org/examples/textures/planets/earth_normal_2048.jpg');
+        const cloudMap = textureLoader.load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png');
+        
+        const earthMaterial = new THREE.MeshPhongMaterial({
+            map: earthMap,
+            specularMap: earthSpecularMap,
+            specular: new THREE.Color(0x333333),
+            shininess: 8,
+            normalMap: earthNormalMap,
+            normalScale: new THREE.Vector2(0.8, 0.8)
+        });
+        
+        const earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
+        
+        // Clouds layer
+        const cloudGeometry = new THREE.SphereGeometry(1.01, 128, 128);
+        const cloudMaterial = new THREE.MeshPhongMaterial({
+            map: cloudMap,
+            transparent: true,
+            opacity: 0.1,
+            blending: THREE.AdditiveBlending
+        });
+        const clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
+        
+        // --- Lighting (clean, minimal) ---
+        const ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
+        
+        const mainLight = new THREE.DirectionalLight(0xffffff, 1.0);
+        mainLight.position.set(3, 4, 2);
+        scene.add(mainLight);
+        
+        const fillLight = new THREE.PointLight(0x88aaff, 0.25);
+        fillLight.position.set(0, -1, 1);
+        scene.add(fillLight);
+        
+        const backLight = new THREE.PointLight(0xffaa66, 0.2);
+        backLight.position.set(-1, 1, -2);
+        scene.add(backLight);
+        
+        // --- Helper: lat/lon to Vector3 ---
+        function latLonToVector3(lat, lon, radius = 1.02) {
+            const phi = (90 - lat) * Math.PI / 180;
+            const theta = lon * Math.PI / 180;
+            const x = radius * Math.sin(phi) * Math.cos(theta);
+            const y = radius * Math.cos(phi);
+            const z = radius * Math.sin(phi) * Math.sin(theta);
+            return new THREE.Vector3(x, y, z);
+        }
+        
+        // --- Locations Data ---
+        const locationsData = [
+            { name: "New York", lat: 40.7128, lng: -74.0060 },
+            { name: "London", lat: 51.5074, lng: -0.1278 },
+            { name: "Tokyo", lat: 35.6895, lng: 139.6917 },
+            { name: "Sydney", lat: -33.8688, lng: 151.2093 },
+            { name: "Paris", lat: 48.8566, lng: 2.3522 },
+            { name: "Moscow", lat: 55.7558, lng: 37.6173 },
+            { name: "São Paulo", lat: -23.5505, lng: -46.6333 },
+            { name: "Delhi", lat: 28.6139, lng: 77.2090 }
+        ];
+        
+        const markerGroup = [];
+        const labelGroup = [];
+        
+        // Create markers and labels
+        locationsData.forEach(loc => {
+            const pos = latLonToVector3(loc.lat, loc.lng, 1.008);
+            // Minimal marker dot
+            const markerMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6, emissive: 0x1e3a8a, emissiveIntensity: 0.2 });
+            const marker = new THREE.Mesh(new THREE.SphereGeometry(0.008, 16, 16), markerMat);
+            marker.position.copy(pos);
+            markerGroup.push(marker);
+            
+            // Clean CSS2D Label
+            const div = document.createElement('div');
+            div.textContent = loc.name;
+            div.style.color = '#1a1a1a';
+            div.style.fontSize = '11px';
+            div.style.fontWeight = '500';
+            div.style.background = 'rgba(255, 255, 255, 0.9)';
+            div.style.padding = '2px 10px';
+            div.style.borderRadius = '20px';
+            div.style.border = '1px solid rgba(0, 0, 0, 0.08)';
+            div.style.fontFamily = 'inherit';
+            div.style.backdropFilter = 'blur(8px)';
+            div.style.whiteSpace = 'nowrap';
+            div.style.pointerEvents = 'none';
+            div.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)';
+            div.style.letterSpacing = '-0.2px';
+            
+            // Dark mode label adjustment via media query
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (isDark) {
+                div.style.color = '#e5e5e5';
+                div.style.background = 'rgba(28, 28, 30, 0.9)';
+                div.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+            }
+            
+            const label = new CSS2DObject(div);
+            label.position.copy(latLonToVector3(loc.lat, loc.lng, 1.09));
+            labelGroup.push(label);
+        });
+        
+        // --- Group everything together for rotation ---
+        const globeGroup = new THREE.Group();
+        globeGroup.add(earthMesh);
+        globeGroup.add(clouds);
+        markerGroup.forEach(m => globeGroup.add(m));
+        labelGroup.forEach(l => globeGroup.add(l));
+        scene.add(globeGroup);
+        
+        // --- Rotation Tween Logic ---
+        let activeTween = false;
+        let targetQuaternion = null;
+        let startQuaternion = null;
+        let tweenStartTime = 0;
+        const tweenDuration = 700;
+        
+        function getWorldPositionOfLocation(lat, lon) {
+            const localPos = latLonToVector3(lat, lon, 1.0);
+            return localPos.clone().applyQuaternion(globeGroup.quaternion);
+        }
+        
+        function computeRotationToFaceLocation(lat, lon, cameraPos) {
+            const cameraDir = cameraPos.clone().normalize();
+            const currentWorldDir = getWorldPositionOfLocation(lat, lon).normalize();
+            const quatFromTo = new THREE.Quaternion().setFromUnitVectors(currentWorldDir, cameraDir);
+            const newQuat = quatFromTo.clone().multiply(globeGroup.quaternion);
+            return newQuat;
+        }
+        
+        function spinToLocation(lat, lon) {
+            if (activeTween) return;
+            const cameraPos = camera.position.clone();
+            const rawQuat = computeRotationToFaceLocation(lat, lon, cameraPos);
+            startQuaternion = globeGroup.quaternion.clone();
+            targetQuaternion = rawQuat.clone();
+            activeTween = true;
+            tweenStartTime = performance.now();
+        }
+        
+        function updateTween(now) {
+            if (!activeTween) return;
+            const elapsed = now - tweenStartTime;
+            let t = Math.min(1, elapsed / tweenDuration);
+            const easeOut = 1 - Math.pow(1 - t, 3);
+            THREE.Quaternion.slerp(startQuaternion, targetQuaternion, globeGroup.quaternion, easeOut);
+            if (t >= 1.0) {
+                globeGroup.quaternion.copy(targetQuaternion);
+                activeTween = false;
+                targetQuaternion = null;
+                startQuaternion = null;
+            }
+        }
+        
+        // --- UI Button Handlers ---
+        const btns = document.querySelectorAll('.loc-btn');
+        btns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const lat = parseFloat(btn.dataset.lat);
+                const lng = parseFloat(btn.dataset.lng);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    spinToLocation(lat, lng);
+                    // Subtle feedback
+                    btn.style.transform = 'scale(0.96)';
+                    setTimeout(() => { btn.style.transform = ''; }, 150);
+                }
+            });
+        });
+        
+        // --- Cloud rotation & star drift (subtle) ---
+        function animateClouds() {
+            clouds.rotation.y += 0.0006;
+        }
+        
+        // --- Handle theme changes for labels (dynamic) ---
+        const darkModeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+        function updateLabelTheme() {
+            const isDark = darkModeMedia.matches;
+            labelGroup.forEach((label, idx) => {
+                const div = label.element;
+                if (isDark) {
+                    div.style.color = '#e5e5e5';
+                    div.style.background = 'rgba(28, 28, 30, 0.9)';
+                    div.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+                } else {
+                    div.style.color = '#1a1a1a';
+                    div.style.background = 'rgba(255, 255, 255, 0.9)';
+                    div.style.border = '1px solid rgba(0, 0, 0, 0.08)';
+                }
+            });
+        }
+        darkModeMedia.addEventListener('change', updateLabelTheme);
+        updateLabelTheme();
+        
+        // --- Resize handler ---
+        window.addEventListener('resize', onWindowResize, false);
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        // --- Simple micro-animation for stars rotation ---
+        function animateStars() {
+            stars.rotation.y += 0.00015;
+            stars.rotation.x += 0.00005;
+        }
+        
+        // --- Animation Loop ---
+        function animate() {
+            const now = performance.now();
+            updateTween(now);
+            animateClouds();
+            animateStars();
+            controls.update();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+        
+        // Initial subtle rotation to show globe orientation
+        setTimeout(() => {
+            if (!activeTween) {
+                globeGroup.quaternion.setFromUnitVectors(
+                    new THREE.Vector3(0, 0, 1),
+                    new THREE.Vector3(0.15, 0.05, 0.98)
+                );
+            }
+        }, 100);
+    </script>
+</body>
+</html>

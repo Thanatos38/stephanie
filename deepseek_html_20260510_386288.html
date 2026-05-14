@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Interactive 3D Globe - Spin to Selected Location</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', 'Poppins', 'Arial', sans-serif;
+        }
+        /* UI Panel - Location Buttons */
+        .location-panel {
+            position: absolute;
+            bottom: 25px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            padding: 15px 20px;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(8px);
+            border-radius: 60px;
+            width: fit-content;
+            margin: 0 auto;
+            z-index: 10;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            pointer-events: auto;
+        }
+        .loc-btn {
+            background: rgba(20,30,45,0.9);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(4px);
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border-left: 3px solid #ffaa44;
+        }
+        .loc-btn:hover {
+            background: #ffaa44;
+            color: #1a1e2a;
+            transform: scale(1.05);
+            border-left-color: white;
+        }
+        .loc-btn:active {
+            transform: scale(0.98);
+        }
+        .title-card {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            padding: 8px 18px;
+            border-radius: 40px;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 10;
+            pointer-events: none;
+            font-family: monospace;
+            letter-spacing: 1px;
+            border-left: 3px solid #ffaa44;
+        }
+        @media (max-width: 700px) {
+            .loc-btn { padding: 6px 14px; font-size: 0.8rem; }
+            .location-panel { gap: 10px; bottom: 15px; padding: 10px 16px; }
+            .title-card { font-size: 0.7rem; top: 12px; left: 12px; }
+        }
+        .instruction {
+            position: absolute;
+            bottom: 100px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            padding: 5px 12px;
+            border-radius: 20px;
+            color: #ccc;
+            font-size: 0.7rem;
+            pointer-events: none;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="title-card">
+        🌍 INTERACTIVE GLOBE • CLICK ANY LOCATION TO SPIN
+    </div>
+    <div class="location-panel">
+        <button class="loc-btn" data-lat="40.7128" data-lng="-74.0060" data-name="New York">🗽 New York</button>
+        <button class="loc-btn" data-lat="51.5074" data-lng="-0.1278" data-name="London">🇬🇧 London</button>
+        <button class="loc-btn" data-lat="35.6895" data-lng="139.6917" data-name="Tokyo">🗼 Tokyo</button>
+        <button class="loc-btn" data-lat="-33.8688" data-lng="151.2093" data-name="Sydney">🦘 Sydney</button>
+        <button class="loc-btn" data-lat="48.8566" data-lng="2.3522" data-name="Paris">🗼 Paris</button>
+        <button class="loc-btn" data-lat="55.7558" data-lng="37.6173" data-name="Moscow">🇷🇺 Moscow</button>
+        <button class="loc-btn" data-lat="-23.5505" data-lng="-46.6333" data-name="São Paulo">🇧🇷 São Paulo</button>
+        <button class="loc-btn" data-lat="28.6139" data-lng="77.2090" data-name="Delhi">🇮🇳 Delhi</button>
+    </div>
+    <div class="instruction">
+        ✨ Click any button → globe spins & brings location front & center
+    </div>
+
+    <!-- Import Three.js core and add-ons -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+        // --- Setup Scene, Camera, Renderers ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050b1a); // deep space color
+        scene.fog = new THREE.FogExp2(0x050b1a, 0.0008); // subtle fog
+
+        // Perspective Camera (for 3D globe)
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 3.8);
+        
+        // WebGL Renderer
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
+        
+        // CSS2 Renderer for text labels (always facing camera)
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        document.body.appendChild(labelRenderer.domElement);
+        
+        // --- Controls with autoRotate initially false, but allow manual interaction after spin? We'll manage spin tween manually.
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;      // smooth inertia
+        controls.dampingFactor = 0.05;
+        controls.autoRotate = false;
+        controls.enableZoom = true;
+        controls.enablePan = false;
+        controls.zoomSpeed = 1.2;
+        controls.rotateSpeed = 1.0;
+        controls.target.set(0, 0, 0);
+        
+        // --- Add Stars Background (Particle System) ---
+        const starGeometry = new THREE.BufferGeometry();
+        const starCount = 1800;
+        const starPositions = new Float32Array(starCount * 3);
+        for (let i = 0; i < starCount; i++) {
+            starPositions[i*3] = (Math.random() - 0.5) * 800;
+            starPositions[i*3+1] = (Math.random() - 0.5) * 800;
+            starPositions[i*3+2] = (Math.random() - 0.5) * 150 - 50;
+        }
+        starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+        const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.28, transparent: true, opacity: 0.7 });
+        const stars = new THREE.Points(starGeometry, starMaterial);
+        scene.add(stars);
+        
+        // Optional: a second faint star layer
+        const starGeometry2 = new THREE.BufferGeometry();
+        const starCount2 = 800;
+        const starPositions2 = new Float32Array(starCount2 * 3);
+        for (let i = 0; i < starCount2; i++) {
+            starPositions2[i*3] = (Math.random() - 0.5) * 600;
+            starPositions2[i*3+1] = (Math.random() - 0.5) * 600;
+            starPositions2[i*3+2] = (Math.random() - 0.5) * 120 - 40;
+        }
+        starGeometry2.setAttribute('position', new THREE.BufferAttribute(starPositions2, 3));
+        const starMaterial2 = new THREE.PointsMaterial({ color: 0xaaccff, size: 0.18, transparent: true, opacity: 0.5 });
+        const stars2 = new THREE.Points(starGeometry2, starMaterial2);
+        scene.add(stars2);
+        
+        // --- Create the Earth Globe ---
+        const earthGeometry = new THREE.SphereGeometry(1.0, 128, 128);
+        // High-res earth texture (classic diffuse map)
+        const textureLoader = new THREE.TextureLoader();
+        const earthMap = textureLoader.load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
+        const earthSpecularMap = textureLoader.load('https://threejs.org/examples/textures/planets/earth_specular_2048.jpg');
+        const earthNormalMap = textureLoader.load('https://threejs.org/examples/textures/planets/earth_normal_2048.jpg');
+        const cloudMap = textureLoader.load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png');
+        
+        const earthMaterial = new THREE.MeshPhongMaterial({
+            map: earthMap,
+            specularMap: earthSpecularMap,
+            specular: new THREE.Color('grey'),
+            shininess: 5,
+            normalMap: earthNormalMap,
+            normalScale: new THREE.Vector2(0.8, 0.8)
+        });
+        
+        const earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
+        scene.add(earthMesh);
+        
+        // Add Cloud Layer
+        const cloudGeometry = new THREE.SphereGeometry(1.01, 128, 128);
+        const cloudMaterial = new THREE.MeshPhongMaterial({
+            map: cloudMap,
+            transparent: true,
+            opacity: 0.12,
+            blending: THREE.AdditiveBlending
+        });
+        const clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
+        scene.add(clouds);
+        
+        // --- Atmospheric Glow Effect (simple ring) optional but nice
+        const glowGeometry = new THREE.SphereGeometry(1.02, 64, 64);
+        const glowMaterial = new THREE.MeshBasicMaterial({
+            color: 0x2266aa,
+            transparent: true,
+            opacity: 0.07,
+            side: THREE.BackSide
+        });
+        const atmosphere = new THREE.Mesh(glowGeometry, glowMaterial);
+        scene.add(atmosphere);
+        
+        // --- Lighting ---
+        // Ambient light
+        const ambientLight = new THREE.AmbientLight(0x222222);
+        scene.add(ambientLight);
+        // Main directional light (sun)
+        const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        sunLight.position.set(5, 3, 5);
+        scene.add(sunLight);
+        // Fill light from below
+        const fillLight = new THREE.PointLight(0x4466cc, 0.3);
+        fillLight.position.set(0, -2, 0);
+        scene.add(fillLight);
+        // Back rim light
+        const rimLight = new THREE.PointLight(0xffaa66, 0.4);
+        rimLight.position.set(-2, 1, -3);
+        scene.add(rimLight);
+        
+        // --- Helper: convert lat/lon to Vector3 (radius = 1.0 for globe surface, but labels slightly outwards)
+        function latLonToVector3(lat, lon, radius = 1.02) {
+            const phi = (90 - lat) * Math.PI / 180;
+            const theta = lon * Math.PI / 180;
+            const x = radius * Math.sin(phi) * Math.cos(theta);
+            const y = radius * Math.cos(phi);
+            const z = radius * Math.sin(phi) * Math.sin(theta);
+            return new THREE.Vector3(x, y, z);
+        }
+        
+        // --- Create CSS2D Text Labels for each predefined location (plus extra marker dots)
+        const locationsData = [
+            { name: "New York", lat: 40.7128, lng: -74.0060, color: "#ffaa66" },
+            { name: "London", lat: 51.5074, lng: -0.1278, color: "#ffaa66" },
+            { name: "Tokyo", lat: 35.6895, lng: 139.6917, color: "#ffaa66" },
+            { name: "Sydney", lat: -33.8688, lng: 151.2093, color: "#ffaa66" },
+            { name: "Paris", lat: 48.8566, lng: 2.3522, color: "#ffaa66" },
+            { name: "Moscow", lat: 55.7558, lng: 37.6173, color: "#ffaa66" },
+            { name: "São Paulo", lat: -23.5505, lng: -46.6333, color: "#ffaa66" },
+            { name: "Delhi", lat: 28.6139, lng: 77.2090, color: "#ffaa66" }
+        ];
+        
+        // Store markers and label objects for possible future reference
+        const labelGroup = [];
+        const markerGroup = [];
+        
+        // Create a small glowing dot for each location (tiny sphere)
+        locationsData.forEach(loc => {
+            const pos = latLonToVector3(loc.lat, loc.lng, 1.005);
+            // Small sphere marker
+            const markerMat = new THREE.MeshStandardMaterial({ color: 0xff6644, emissive: 0x441100, emissiveIntensity: 0.5 });
+            const marker = new THREE.Mesh(new THREE.SphereGeometry(0.012, 16, 16), markerMat);
+            marker.position.copy(pos);
+            scene.add(marker);
+            markerGroup.push(marker);
+            
+            // CSS2D Text Label
+            const div = document.createElement('div');
+            div.textContent = `📍 ${loc.name}`;
+            div.style.color = '#fff9e0';
+            div.style.fontSize = '14px';
+            div.style.fontWeight = 'bold';
+            div.style.textShadow = '1px 1px 0px #000000aa';
+            div.style.background = 'rgba(0,0,0,0.65)';
+            div.style.padding = '2px 8px';
+            div.style.borderRadius = '20px';
+            div.style.borderLeft = `3px solid #ffaa44`;
+            div.style.fontFamily = 'sans-serif';
+            div.style.backdropFilter = 'blur(4px)';
+            div.style.whiteSpace = 'nowrap';
+            div.style.pointerEvents = 'none';
+            const label = new CSS2DObject(div);
+            label.position.copy(latLonToVector3(loc.lat, loc.lng, 1.08));
+            scene.add(label);
+            labelGroup.push(label);
+        });
+        
+        // Add extra floating particles or 'sparkle' effect around globe? (optional)
+        const particleRingGeo = new THREE.BufferGeometry();
+        const ringParticleCount = 800;
+        const ringPositions = new Float32Array(ringParticleCount * 3);
+        for (let i = 0; i < ringParticleCount; i++) {
+            // random positions on sphere shell
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            const r = 1.04;
+            const x = r * Math.sin(phi) * Math.cos(theta);
+            const y = r * Math.sin(phi) * Math.sin(theta);
+            const z = r * Math.cos(phi);
+            ringPositions[i*3] = x;
+            ringPositions[i*3+1] = z;
+            ringPositions[i*3+2] = y;
+        }
+        particleRingGeo.setAttribute('position', new THREE.BufferAttribute(ringPositions, 3));
+        const particleMat = new THREE.PointsMaterial({ color: 0x88aaff, size: 0.003, transparent: true, opacity: 0.4 });
+        const orbitParticles = new THREE.Points(particleRingGeo, particleMat);
+        scene.add(orbitParticles);
+        
+        // --- Smooth Rotation Logic (Tween) ---
+        // We want to rotate the entire globe group? Actually we rotate the earth, clouds, labels, markers together.
+        // But note: CSS2D labels rotate with their parent? They are added separately to scene. But to keep labels & markers aligned,
+        // we need to rotate the entire system: earth, clouds, markers, labels, orbit particles? Actually the easiest & cleanest: 
+        // group earth + clouds + markers + labels + particles into a single group? But CSS2DObject rotation relative to camera is independent.
+        // For the globe to spin and bring a location to front (facing camera), we can compute current camera orientation target and rotate the whole globe group.
+        // However users can also drag with OrbitControls, which moves camera around static globe. For consistency, we make globe static and rotate camera? 
+        // Or better: We rotate the globe group but OrbitControls target is world center, when globe rotates, markers and labels rotate too (CSS2D objects do rotate with group because they are inside group). But CSS2DRenderer always faces camera, but position rotates. That's perfect.
+        // So let's create a main 'globeGroup' that contains earth, clouds, atmosphere, markers, labels (CSS2D), particles. Then we rotate the group.
+        // But stars should not rotate. Also CSS2DObject when added to group, will still face camera but their world positions rotate. That works.
+        // We need to re-structure: remove existing from scene, add to group.
+        
+        const globeGroup = new THREE.Group();
+        // Transfer existing objects
+        scene.remove(earthMesh);
+        scene.remove(clouds);
+        scene.remove(atmosphere);
+        markerGroup.forEach(m => scene.remove(m));
+        labelGroup.forEach(l => scene.remove(l));
+        scene.remove(orbitParticles);
+        
+        globeGroup.add(earthMesh);
+        globeGroup.add(clouds);
+        globeGroup.add(atmosphere);
+        markerGroup.forEach(m => globeGroup.add(m));
+        labelGroup.forEach(l => globeGroup.add(l));
+        globeGroup.add(orbitParticles);
+        
+        scene.add(globeGroup);
+        
+        // Now, rotating globeGroup will rotate earth + labels + markers, so we can bring any location to front by rotating the group.
+        // However note: OrbitControls currently rotates the camera around scene origin, which works nicely if the globeGroup is rotated,
+        // but we need to ensure that the "front" relative to camera is achieved by aligning target location to camera's view direction.
+        // The best user experience: We want to rotate the globe such that the selected location faces the camera (i.e., the vector from globe center to location aligns with camera direction).
+        // Since camera can be moved by OrbitControls, we compute the desired rotation to make the location's world position become aligned with camera's forward axis.
+        // But simpler approach: Reset globeGroup rotation relative to world so that after applying rotation, the location's position in world space lies along positive Z axis relative to camera? 
+        // However because camera can be anywhere, a robust method: compute current globeGroup orientation, find rotation needed to bring location to the current camera view direction center.
+        // Another robust approach: Since users can orbit, we'll compute the desired final globeGroup rotation that makes the location appear at the screen center. But we must combine with existing rotation.
+        // We'll implement a function that rotates globeGroup smoothly to bring a given lat/lon to face the camera, preserving up orientation.
+        
+        // Helper: get world position of a point on globe (lat/lon) after current group rotation.
+        function getWorldPositionOfLocation(lat, lon) {
+            const localPos = latLonToVector3(lat, lon, 1.0);
+            const worldPos = localPos.clone().applyQuaternion(globeGroup.quaternion);
+            return worldPos;
+        }
+        
+        // Smooth rotation using requestAnimationFrame & lerp / quaternion slerp
+        let activeTween = false;
+        let targetQuaternion = null;
+        let startQuaternion = null;
+        let tweenProgress = 0;
+        let tweenDuration = 800; // ms
+        let tweenStartTime = 0;
+        
+        // Compute target quaternion to bring a given lat/lon to face camera.
+        // The idea: We want the point's direction (from globe center) to align with the camera's view direction (unit vector from globe center to camera position).
+        // But we also want to minimal rotation and keep the world up (Y) as stable as possible, avoiding tilt nastiness.
+        function computeRotationToFaceLocation(lat, lon, cameraPos) {
+            // camera position in world space relative to globe center (0,0,0)
+            const cameraDir = cameraPos.clone().normalize();
+            // Desired world direction of the point after rotation
+            const targetWorldDir = cameraDir;
+            // Current world direction of the point (before rotation)
+            const currentWorldDir = getWorldPositionOfLocation(lat, lon).normalize();
+            // Find rotation that maps currentWorldDir to targetWorldDir.
+            const quatFromTo = new THREE.Quaternion().setFromUnitVectors(currentWorldDir, targetWorldDir);
+            // Combine with current group quaternion: final = quatFromTo * currentQuat ?
+            // Because we want after applying new rot: newQuat * localPoint = targetWorldDir. currentQuat * localPoint = currentWorldDir.
+            // We want newQuat * localPoint = targetWorldDir, where targetWorldDir = quatFromTo * currentWorldDir = quatFromTo * (currentQuat * localPoint) = (quatFromTo * currentQuat) * localPoint.
+            // So newQuat = quatFromTo * currentQuat.
+            const newQuat = quatFromTo.clone().multiply(globeGroup.quaternion);
+            return newQuat;
+        }
+        
+        // Improved: also try to keep upwards orientation steady (so globe doesn't roll unnaturally).
+        // The above already respects relative, but might cause unintended roll. We'll add a secondary adjustment to minimize roll by aligning the local Y to world up after primary rotation.
+        // For simplicity, the effect remains visually pleasing: globe spins and the location centers.
+        
+        function spinToLocation(lat, lon) {
+            if (activeTween) return;
+            const cameraPos = camera.position.clone();
+            let rawQuat = computeRotationToFaceLocation(lat, lon, cameraPos);
+            // Optional: enhance by keeping 'up' vector consistent: extract up, but this is good enough.
+            // Apply via slerp
+            startQuaternion = globeGroup.quaternion.clone();
+            targetQuaternion = rawQuat.clone();
+            activeTween = true;
+            tweenProgress = 0;
+            tweenStartTime = performance.now();
+        }
+        
+        // Animation loop for tween:
+        function updateTween(now) {
+            if (!activeTween) return;
+            const elapsed = now - tweenStartTime;
+            let t = Math.min(1, elapsed / tweenDuration);
+            // easing cubic out
+            const easeOut = 1 - Math.pow(1 - t, 3);
+            THREE.Quaternion.slerp(startQuaternion, targetQuaternion, globeGroup.quaternion, easeOut);
+            if (t >= 1.0) {
+                globeGroup.quaternion.copy(targetQuaternion);
+                activeTween = false;
+                targetQuaternion = null;
+                startQuaternion = null;
+            }
+        }
+        
+        // --- Connect UI Buttons ---
+        const btns = document.querySelectorAll('.loc-btn');
+        btns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const lat = parseFloat(btn.dataset.lat);
+                const lng = parseFloat(btn.dataset.lng);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    spinToLocation(lat, lng);
+                    // Optional small visual feedback on button
+                    btn.style.transform = 'scale(0.96)';
+                    setTimeout(() => { btn.style.transform = ''; }, 150);
+                }
+            });
+        });
+        
+        // --- Simple Animation: rotate stars very slowly, clouds subtle rotation when not interacting? but keep subtle
+        let time = 0;
+        
+        // Also handle window resize
+        window.addEventListener('resize', onWindowResize, false);
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        // --- Optional: slight auto-rotation of clouds independently for effect
+        function animateClouds() {
+            clouds.rotation.y += 0.0008;
+        }
+        
+        // --- Render Loop ---
+        function animate() {
+            const now = performance.now();
+            updateTween(now);
+            
+            // subtle cloud drift
+            animateClouds();
+            // Rotate stars extremely slow for ambiance
+            stars.rotation.y += 0.0002;
+            stars2.rotation.x += 0.0001;
+            stars2.rotation.y += 0.00015;
+            
+            // Update controls if needed (OrbitControls updates camera)
+            controls.update(); // must be called if damping or autoRotate enabled, but we use manual tween, still allow user interation after spin.
+            
+            // Render WebGL content
+            renderer.render(scene, camera);
+            // Render CSS2D labels
+            labelRenderer.render(scene, camera);
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // small initial spin to show interaction hint? not needed, but add slight random rotation? no.
+        // ensure everything loads
+        animate();
+        
+        // initial small set to show orientation nicely: rotate globe slightly so default view looks decent
+        setTimeout(() => {
+            // slight initial rotation for aesthetics, no user action needed.
+            if (!activeTween) {
+                globeGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1), new THREE.Vector3(0.2, 0.1, 0.97));
+            }
+        }, 100);
+        
+        console.log("Interactive Globe Ready — Click any location button and watch globe spin!");
+    </script>
+</body>
+</html>

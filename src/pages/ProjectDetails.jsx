@@ -52,7 +52,7 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
     client.fetch(
   `*[_type=="project" && _id==$id][0]{
     _id, title, tagline, shortDesc, longDesc,
-    category,
+    category,locations,
     "team": team[]{name, role, link},
     client, date, theme, highlights,
     "coverImage": coverImage.asset->url,
@@ -284,6 +284,13 @@ export default function ProjectDetail({ darkMode, setDarkMode }) {
         <span className="info-value">{project.client}</span>
       </div>
     )}
+
+    {project.locations?.length > 0 && (
+  <div className="info-row">
+    <span className="info-label">Location</span>
+    <span className="info-value">{project.locations.join(" · ")}</span>
+  </div>
+)}
 
     {project.date && (
       <div className="info-row">

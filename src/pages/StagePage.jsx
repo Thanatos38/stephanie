@@ -4,7 +4,7 @@ export default function StagePage({ darkMode, setDarkMode }) {
   return (
     <CategoryPage
       category="stage"
-      title="Stage Design"
+      title="Stage"
       
       darkMode={darkMode}          // ✅ ADD THIS
       setDarkMode={setDarkMode}    // ✅ ADD THIS

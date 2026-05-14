@@ -5,6 +5,7 @@ import { client } from "../sanity";
 import { FaInstagram } from "react-icons/fa";
 import Navbar from "../components/Navbar";
 import { useTranslate, useTranslateArray } from "../hooks/Usetranslation";
+import GlobeSection from "../components/Globesection";
 
 export default function AboutPage({ darkMode, setDarkMode }) {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ export default function AboutPage({ darkMode, setDarkMode }) {
   const tCompany = useTranslate("Company");
   const tAbout = useTranslate("About");
   const tContact = useTranslate("Contact");
+  
 
   useEffect(() => {
     client.fetch(`*[_type=="project" && showInTimeline==true && defined(date)] 
@@ -53,6 +55,7 @@ export default function AboutPage({ darkMode, setDarkMode }) {
 
   return (
     <div className={`about-page ${darkMode ? "dark" : "light"}`}>
+  
 
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} alwaysScrolled />
 
@@ -119,6 +122,8 @@ export default function AboutPage({ darkMode, setDarkMode }) {
       ))}
   </div>
 </section>
+
+  <GlobeSection darkMode={darkMode} />
 
       {/* FOOTER */}
       <footer className="footer">

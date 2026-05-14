@@ -6,7 +6,7 @@ export default function SetPage({ darkMode, setDarkMode }) {
     
     <CategoryPage
   category="set"
-  title="Set Design"
+  title="Set"
   
   darkMode={darkMode}
   setDarkMode={setDarkMode}
